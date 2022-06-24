@@ -707,7 +707,6 @@ class Body extends events.EventEmitter {
 
 exports.Body   = Body;
 exports.Header = Header;
-exports.Iconv  = Iconv;
 exports.stream = require('haraka-message-stream')
 
 function _get_html_insert_position (buf) {

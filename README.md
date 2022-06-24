@@ -7,8 +7,19 @@
 ## USAGE
 
 ```js
-const EmailMessage = require('haraka-email-message')
+const message = require('haraka-email-message')
+new message.Header(options)
+new message.Body(header, options)
+new message.stream(cfg, uuid, header_list)
 ```
+
+## Exports
+
+- [Header](#Header)
+- [Body](#Body)
+- stream (a [haraka-message-stream](https://github.com/haraka/message-stream))
+
+
 
 ## Header
 =============
