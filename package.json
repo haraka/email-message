@@ -1,0 +1,38 @@
+{
+  "name": "haraka-email-message",
+  "version": "1.0.0",
+  "description": "Haraka email message",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npx eslint *.js test",
+    "lintfix": "npx eslint --fix *.js test",
+    "versions": "npx dependency-version-checker check",
+    "test": "npx mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haraka/email-message.git"
+  },
+  "keywords": [
+    "haraka",
+    "email-message"
+  ],
+  "author": "Haraka Team <haraka.mail@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/haraka/email-message/issues"
+  },
+  "homepage": "https://github.com/haraka/email-message#readme",
+  "devDependencies": {
+    "eslint": ">=8",
+    "eslint-plugin-haraka": "*",
+    "mocha": ">=9.0.0"
+  },
+  "dependencies": {
+    "haraka-config": "^1.1.0",
+    "haraka-message-stream": "^1.2.0",
+    "iconv": "^3.0.1",
+    "libmime": "^5.1.0",
+    "libqp": "^1.1.0"
+  }
+}
