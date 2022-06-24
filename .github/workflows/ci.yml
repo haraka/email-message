@@ -63,7 +63,7 @@ jobs:
     - run: npm run test
 
   test-win-2019:
-    needs: [ test-win, get-lts ]
+    needs: [ test-win-latest, get-lts ]
     runs-on: windows-2019
     strategy:
       matrix:
