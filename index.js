@@ -458,15 +458,19 @@ class Body extends events.EventEmitter {
         return new_buf;
     }
 
+    _emit_buf_fill () {
+        if (this.buf_fill > 0) {
+            // see below for why we create a new buffer here.
+            const to_emit = Buffer.alloc(this.buf_fill);
+            this.buf.copy(to_emit, 0, 0, this.buf_fill);
+            this.attachment_stream.emit_data(to_emit);
+            this.buf_fill = 0;
+        }
+    }
+
     force_end () {
         if (this.state === 'attachment') {
-            if (this.buf_fill > 0) {
-                // see below for why we create a new buffer here.
-                const to_emit = Buffer.alloc(this.buf_fill);
-                this.buf.copy(to_emit, 0, 0, this.buf_fill);
-                this.attachment_stream.emit_data(to_emit);
-                this.buf_fill = 0;
-            }
+            this._emit_buf_fill()
             this.attachment_stream.emit_end(true);
         }
     }
@@ -477,13 +481,7 @@ class Body extends events.EventEmitter {
         }
 
         if (this.state === 'attachment') {
-            if (this.buf_fill > 0) {
-                // see below for why we create a new buffer here.
-                const to_emit = Buffer.alloc(this.buf_fill);
-                this.buf.copy(to_emit, 0, 0, this.buf_fill);
-                this.attachment_stream.emit_data(to_emit);
-                this.buf_fill = 0;
-            }
+            this._emit_buf_fill()
             this.attachment_stream.emit_end();
         }
 
