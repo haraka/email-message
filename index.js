@@ -458,7 +458,7 @@ class Body extends events.EventEmitter {
         return new_buf;
     }
 
-    _emit_buf_fill() {
+    _emit_buf_fill () {
         if (this.buf_fill > 0) {
             // see below for why we create a new buffer here.
             const to_emit = Buffer.alloc(this.buf_fill);
