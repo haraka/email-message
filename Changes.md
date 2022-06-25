@@ -11,4 +11,3 @@
 
 
 [1.0.0]: https://github.com/haraka/email-message/releases/tag/1.0.0
-[1.0.1]: /releases/tag/1.0.1
