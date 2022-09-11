@@ -347,7 +347,7 @@ class Body extends events.EventEmitter {
     }
 
     set_banner (banners) {
-        this.add_filter((ct, enc, buf) => insert_banner(ct, enc, buf, banners));
+        this.add_filter((ct, enc, buf, cd) => insert_banner(ct, enc, buf, cd, banners));
     }
 
     parse_more (line) {
@@ -449,10 +449,10 @@ class Body extends events.EventEmitter {
         return this[`parse_${this.state}`](line);
     }
 
-    _empty_filter (ct, enc) {
+    _empty_filter (ct, enc, cd) {
         let new_buf = Buffer.from('');
         this.filters.forEach(filter => {
-            new_buf = filter(ct, enc, new_buf) || new_buf;
+            new_buf = filter(ct, enc, new_buf, cd) || new_buf;
         });
 
         return new_buf;
@@ -497,8 +497,9 @@ class Body extends events.EventEmitter {
         }
         this.body_encoding = enc;
 
+        const cd = this.header.get_decoded('content-disposition') || '';
         if (!this.body_text_encoded_pos) { // nothing to decode
-            return Buffer.concat([this._empty_filter(ct, enc) || Buffer.from(''), line]);
+            return Buffer.concat([this._empty_filter(ct, enc, cd) || Buffer.from(''), line]);
         }
         if (this.bodytext.length !== 0) return line;     // already decoded?
 
@@ -739,8 +740,8 @@ function _get_html_insert_position (buf) {
     return buf.length - 1; // default is at the end
 }
 
-function insert_banner (ct, enc, buf, banners) {
-    if (!banners || !/^text\//i.test(ct)) {
+function insert_banner (ct, enc, buf, cd, banners) {
+    if (!banners || !/^text\//i.test(ct) || /^attachment/i.test(cd)) {
         return;
     }
     const is_html = /text\/html/i.test(ct);
