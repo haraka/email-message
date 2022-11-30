@@ -1,6 +1,10 @@
 
 ### Unreleased
 
+### [1.2.0] - 2022-11-29
+
+- dep(libqp): update from 1.1 -> 2.0.1
+
 
 ### [1.1.0] - 2022-09-14
 
@@ -16,3 +20,4 @@
 
 [1.0.0]: https://github.com/haraka/email-message/releases/tag/1.0.0
 [1.1.0]: https://github.com/haraka/email-message/releases/tag/1.1.0
+[1.2.0]: https://github.com/haraka/email-message/releases/tag/1.2.0
