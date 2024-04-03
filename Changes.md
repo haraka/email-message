@@ -1,6 +1,15 @@
 
 ### Unreleased
 
+### [1.2.1] - 2024-04-03
+
+- dep(libqp): bump to 2.1.0
+- dep(libmime): bump to 5.3.4
+- dep(haraka-message-stream): bump to 1.2.1
+- dep(mocha & eslint): remove from devDeps (install as needed with npx)
+- add ./test to .npmignore
+
+
 ### [1.2.0] - 2022-11-29
 
 - dep(libqp): update from 1.1 -> 2.0.1
