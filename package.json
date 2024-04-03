@@ -4,10 +4,10 @@
   "description": "Haraka email message",
   "main": "index.js",
   "scripts": {
-    "lint": "npx eslint *.js test",
-    "lintfix": "npx eslint --fix *.js test",
+    "lint": "npx eslint@^8 *.js test",
+    "lintfix": "npx eslint@^8 --fix *.js test",
     "versions": "npx dependency-version-checker check",
-    "test": "npx mocha"
+    "test": "npx mocha@^10"
   },
   "repository": {
     "type": "git",
@@ -24,15 +24,13 @@
   },
   "homepage": "https://github.com/haraka/email-message#readme",
   "devDependencies": {
-    "eslint": ">=8",
-    "eslint-plugin-haraka": "*",
-    "mocha": ">=9.0.0"
+    "eslint-plugin-haraka": "^1.0.15"
   },
   "dependencies": {
     "haraka-config": "^1.1.0",
-    "haraka-message-stream": "^1.2.0",
+    "haraka-message-stream": "^1.2.1",
     "iconv": "^3.0.1",
-    "libmime": "^5.1.0",
-    "libqp": "^2.0.1"
+    "libmime": "^5.3.4",
+    "libqp": "^2.1.0"
   }
 }
