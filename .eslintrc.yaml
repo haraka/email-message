@@ -2,7 +2,9 @@ env:
   node: true
   es6: true
   mocha: true
-  es2020: true
+
+parserOptions:
+  ecmaVersion: 2023
 
 plugins:
   - haraka
@@ -10,9 +12,6 @@ plugins:
 extends:
   - eslint:recommended
   - plugin:haraka/recommended
-
-rules:
-  indent: [warn, 4, {"SwitchCase": 1}]
 
 root: true
 
