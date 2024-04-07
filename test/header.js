@@ -1,5 +1,7 @@
 const assert = require('assert');
 
+const utils = require('haraka-utils');
+
 const Header = require('../index').Header;
 
 const lines = [
@@ -129,7 +131,7 @@ describe('header', function () {
         ' filename*1*=%A1%88%E5%86%85%E6%9B%B8%EF%BC%86%E7%94%B3%E8%BE%BC%E6%9B%B8;\n',
         ' filename*2*=%E6%94%B9%2Etxt\n',
       ]);
-      console.log(this.h.get_decoded('content-disposition'));
+      // console.log(this.h.get_decoded('content-disposition'));
       assert.ok(
         this.h
           .get_decoded('content-disposition')
@@ -159,7 +161,13 @@ describe('header', function () {
         this.h.get_decoded('subject'),
         '🧡You can  get a date with me if you seek a beautiful companion.💞',
       );
-      assert.ok(this.h.get_decoded('subject').match(/\p{RGI_Emoji}/gv));
+
+      if (utils.node_min('20.11.0')) {
+        // RegExp 'v' flag requires ES2024 (node 20.11+)
+        assert.ok(this.h.get_decoded('subject').match(/\p{RGI_Emoji}/gv));
+      } else {
+        assert.ok(this.h.get_decoded('subject').match(/\p{Emoji}/gu));
+      }
     });
   });
 });

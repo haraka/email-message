@@ -5,3 +5,6 @@ env:
   es2022: true
 
 extends: ['@haraka']
+
+rules:
+  no-unused-vars: ['warn']
