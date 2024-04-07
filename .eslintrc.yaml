@@ -2,23 +2,6 @@ env:
   node: true
   es6: true
   mocha: true
+  es2022: true
 
-parserOptions:
-  ecmaVersion: 2023
-
-plugins:
-  - haraka
-
-extends:
-  - eslint:recommended
-  - plugin:haraka/recommended
-
-root: true
-
-globals:
-  OK: true
-  CONT: true
-  DENY: true
-  DENYSOFT: true
-  DENYDISCONNECT: true
-  DENYSOFTDISCONNECT: true
+extends: ['@haraka']
