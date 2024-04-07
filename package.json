@@ -3,7 +3,10 @@
   "version": "1.2.2",
   "description": "Haraka email message",
   "main": "index.js",
-  "files": ["CHANGELOG.md", "config"],
+  "files": [
+    "CHANGELOG.md",
+    "config"
+  ],
   "scripts": {
     "format": "npm run prettier:fix && npm run lint:fix",
     "lint": "npx eslint@^8 *.js test",

@@ -9,8 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - dep: eslint-plugin-haraka -> @haraka/eslint-config
 - lint: updated .eslintrc
 - package.json: updated scripts
-- prettier 😬
-
+- prettier
 
 ### [1.2.1] - 2024-04-03
 
