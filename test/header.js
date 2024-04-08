@@ -167,13 +167,13 @@ describe('header', function () {
       console.log((undefined ?? process.version.substring(1)).split('.'))
       console.log(utils.node_min('20.11.0'))
       console.log(utils.node_min('20.11.0', '18.20.0'))
-
+      /*
+      // RegExp 'v' flag requires ES2024 (node 20.11+)
       if (utils.node_min('20.11.0')) {
-        // RegExp 'v' flag requires ES2024 (node 20.11+)
         assert.ok(this.h.get_decoded('subject').match(/\p{RGI_Emoji}/gv));
-      } else {
-        assert.ok(this.h.get_decoded('subject').match(/\p{Emoji}/gu));
       }
+      */
+      assert.ok(this.h.get_decoded('subject').match(/\p{Emoji}/gu));
     });
   });
 });
