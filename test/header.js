@@ -162,11 +162,6 @@ describe('header', function () {
         '🧡You can  get a date with me if you seek a beautiful companion.💞',
       );
 
-      console.log(process.version);
-      console.log(process.version.substring(1));
-      console.log((undefined ?? process.version.substring(1)).split('.'));
-      console.log(utils.node_min('20.11.0'));
-      console.log(utils.node_min('20.11.0', '18.20.0'));
       /*
       // RegExp 'v' flag requires ES2024 (node 20.11+)
       if (utils.node_min('20.11.0')) {
