@@ -1,11 +1,11 @@
 engines:
   eslint:
     enabled: true
-    channel: "eslint-8"
+    channel: 'eslint-8'
     config:
-      config: ".eslintrc.yaml"
+      config: '.eslintrc.yaml'
 
-version: "2"
+version: '2'
 checks:
   argument-count:
     config:
@@ -33,11 +33,11 @@ checks:
       threshold: 4
   similar-code:
     config:
-      threshold: 
+      threshold:
   identical-code:
     config:
-      threshold: 
+      threshold:
 
 ratings:
-   paths:
-   - "**.js"
+  paths:
+    - '**.js'
