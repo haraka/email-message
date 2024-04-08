@@ -1,7 +1,5 @@
 const assert = require('assert');
 
-const utils = require('haraka-utils');
-
 const Header = require('../index').Header;
 
 const lines = [
@@ -164,7 +162,7 @@ describe('header', function () {
 
       /*
       // RegExp 'v' flag requires ES2024 (node 20.11+)
-      if (utils.node_min('20.11.0')) {
+      if (require('haraka-utils').node_min('20.11.0')) {
         assert.ok(this.h.get_decoded('subject').match(/\p{RGI_Emoji}/gv));
       }
       */
