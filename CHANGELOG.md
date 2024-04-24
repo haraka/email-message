@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.2.3] - 2024-04-24
+
+- style(es6): replace forEach with for...of
+- doc(CONTRIBUTORS): added
+
 ### [1.2.2] - 2024-04-07
 
 - dep: eslint-plugin-haraka -> @haraka/eslint-config
@@ -37,3 +42,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.0]: https://github.com/haraka/email-message/releases/tag/v1.2.0
 [1.2.1]: https://github.com/haraka/email-message/releases/tag/v1.2.1
 [1.2.2]: https://github.com/haraka/email-message/releases/tag/v1.2.2
+[1.2.3]: https://github.com/haraka/email-message/releases/tag/v1.2.3

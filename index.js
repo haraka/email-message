@@ -31,8 +31,6 @@ class Header {
   }
 
   parse(lines) {
-    const self = this;
-
     for (const line of lines) {
       if (/^[ \t]/.test(line)) {
         // continuation
@@ -55,11 +53,11 @@ class Header {
     }
 
     // Now add decoded versions
-    Object.keys(this.headers).forEach((key2) => {
-      self.headers[key2].forEach((val2) => {
-        self._add_header_decode(key2, val2, 'push');
-      });
-    });
+    for (const key of Object.keys(this.headers)) {
+      for (const val of this.headers[key]) {
+        this._add_header_decode(key, val, 'push');
+      }
+    }
   }
 
   decode_header(val) {
@@ -75,8 +73,6 @@ class Header {
     };
 
     val = _decode_rfc2231(rfc2231_params, val);
-
-    // console.log(rfc2231_params);
 
     // strip 822 comments in the most basic way - does not support nested comments
     // val = val.replace(/\([^\)]*\)/, '');
@@ -383,21 +379,19 @@ class Body extends events.EventEmitter {
       } else {
         this.emit('mime_boundary', line_string);
         const bod = new Body(new Header(), this.options);
-        this.listeners('attachment_start').forEach((cb) => {
-          bod.on('attachment_start', cb);
-        });
-        this.listeners('attachment_data').forEach((cb) => {
-          bod.on('attachment_data', cb);
-        });
-        this.listeners('attachment_end').forEach((cb) => {
-          bod.on('attachment_end', cb);
-        });
-        this.listeners('mime_boundary').forEach((cb) =>
-          bod.on('mime_boundary', cb),
-        );
-        this.filters.forEach((f) => {
+        for (const ln of [
+          'attachment_start',
+          'attachment_data',
+          'attachment_end',
+          'mime_boundary',
+        ]) {
+          for (const cb of this.listeners(ln)) {
+            bod.on(ln, cb);
+          }
+        }
+        for (const f of this.filters) {
           bod.add_filter(f);
-        });
+        }
         this.children.push(bod);
         bod.state = 'headers';
       }
@@ -468,9 +462,9 @@ class Body extends events.EventEmitter {
 
   _empty_filter(ct, enc, cd) {
     let new_buf = Buffer.from('');
-    this.filters.forEach((filter) => {
+    for (const filter of this.filters) {
       new_buf = filter(ct, enc, new_buf, cd) || new_buf;
-    });
+    }
 
     return new_buf;
   }
@@ -534,9 +528,9 @@ class Body extends events.EventEmitter {
       // whatever encoding scheme we used to decode it.
 
       let new_buf = buf;
-      this.filters.forEach((filter) => {
+      for (const filter of this.filters) {
         new_buf = filter(ct, enc, new_buf) || new_buf;
-      });
+      }
 
       // convert back to base_64 or QP if required:
       if (this.decode_function === this.decode_qp) {
@@ -634,15 +628,14 @@ class Body extends events.EventEmitter {
         // next section
         this.emit('mime_boundary', line_string);
         const bod = new Body(new Header(), this.options);
-        this.listeners('attachment_start').forEach((cb) => {
-          bod.on('attachment_start', cb);
-        });
-        this.listeners('mime_boundary').forEach((cb) =>
-          bod.on('mime_boundary', cb),
-        );
-        this.filters.forEach((f) => {
+        for (const ln of ['attachment_start', 'mime_boundary']) {
+          for (const cb of this.listeners(ln)) {
+            bod.on(ln, cb);
+          }
+        }
+        for (const f of this.filters) {
           bod.add_filter(f);
-        });
+        }
         this.children.push(bod);
         bod.state = 'headers';
         this.state = 'child';

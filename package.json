@@ -1,6 +1,6 @@
 {
   "name": "haraka-email-message",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Haraka email message",
   "main": "index.js",
   "files": [
@@ -14,8 +14,8 @@
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write --log-level=warn",
     "test": "npx mocha@10",
-    "versions": "npx @msimerson/dependency-version-checker check",
-    "versions:fix": "npx @msimerson/dependency-version-checker update && npm run prettier:fix"
+    "versions": "npx dependency-version-checker check",
+    "versions:fix": "npx dependency-version-checker update && npm run prettier:fix"
   },
   "repository": {
     "type": "git",
