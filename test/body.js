@@ -406,4 +406,68 @@ describe('body', function () {
       done();
     });
   });
+
+  describe('attachments', function () {
+    describe('content-type-name', function () {
+      it('with-quotes', function (done) {
+        const body = new Body();
+        body.on('attachment_start', (ct, filename) => {
+          assert.equal(filename, 'aaaa.zip');
+          done();
+        });
+        body.header.parse([
+          'Content-Type: application/zip; name="aaaa.zip"'
+        ]);
+        body.parse_start('');
+      });
+
+      it('without-quotes', function (done) {
+        const body = new Body();
+        body.on('attachment_start', (ct, filename) => {
+          assert.equal(filename, 'aaaa.zip');
+          done();
+        });
+        body.header.parse([
+          'Content-Type: application/zip; name=aaaa.zip'
+        ]);
+        body.parse_start('');
+      });
+
+      it('with-quotes-and-semicolons', function (done) {
+        const body = new Body();
+        body.on('attachment_start', (ct, filename) => {
+          assert.equal(filename, 'aaaa; bbb; cccc.zip');
+          done();
+        });
+        body.header.parse([
+          'Content-Type: application/zip; name="aaaa; bbb; cccc.zip"'
+        ]);
+        body.parse_start('');
+      });
+
+      it('with-one-quote-left', function (done) {
+        const body = new Body();
+        body.on('attachment_start', (ct, filename) => {
+          assert.equal(filename, 'aaaa');
+          done();
+        });
+        body.header.parse([
+          'Content-Type: application/zip; name="aaaa; bbb; cccc.zip'
+        ]);
+        body.parse_start('');
+      });
+
+      it('with-one-quote-right', function (done) {
+        const body = new Body();
+        body.on('attachment_start', (ct, filename) => {
+          assert.equal(filename, 'aaaa');
+          done();
+        });
+        body.header.parse([
+          'Content-Type: application/zip; name=aaaa; bbb; cccc.zip"'
+        ]);
+        body.parse_start('');
+      });
+    });
+  });
 });

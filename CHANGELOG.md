@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.2.4] - 2024-09-27
+- allow attachment filenames containing semicolons https://github.com/haraka/email-message/issues/12
+
 ### [1.2.3] - 2024-04-24
 
 - style(es6): replace forEach with for...of

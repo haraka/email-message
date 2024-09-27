@@ -1,6 +1,6 @@
 {
   "name": "haraka-email-message",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Haraka email message",
   "main": "index.js",
   "files": [

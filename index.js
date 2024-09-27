@@ -438,17 +438,20 @@ class Body extends events.EventEmitter {
     }
     this.ct = ct;
 
+    const buildRegex = (key) => new RegExp(`${key}\\s*=\\s*"([^"]+)"|${key}\\s*=\\s*"?([^";]+)"?`, 'i');
+    const matchKey = (test, key) => test.match(buildRegex(key))?.filter(item => item);
+
     let match;
     if (/^(?:text|message)\//i.test(ct) && !/^attachment/i.test(cd)) {
       this.state = 'body';
     } else if (/^multipart\//i.test(ct)) {
-      match = ct.match(/boundary\s*=\s*"?([^";]+)"?/i);
+      match = matchKey(ct, 'boundary');
       this.boundary = match ? match[1] : '';
       this.state = 'multipart_preamble';
     } else {
-      match = cd.match(/name\s*=\s*"?([^";]+)"?/i);
+      match = matchKey(cd, 'name');
       if (!match) {
-        match = ct.match(/name\s*=\s*"?([^";]+)"?/i);
+        match = matchKey(ct, 'name');
       }
       const filename = match ? match[1] : '';
       this.attachment_stream = exports.createAttachmentStream(this.header);
