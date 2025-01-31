@@ -4,6 +4,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.2.5] - 2025-01-31
+
+#### Added
+
+- 
+
+#### Fixed
+
+- 
+
+#### Changed
+
+- 
+
+
 ### [1.2.4] - 2024-09-27
 - allow attachment filenames containing semicolons https://github.com/haraka/email-message/issues/12
 
@@ -46,3 +61,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.1]: https://github.com/haraka/email-message/releases/tag/v1.2.1
 [1.2.2]: https://github.com/haraka/email-message/releases/tag/v1.2.2
 [1.2.3]: https://github.com/haraka/email-message/releases/tag/v1.2.3
+[1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
+[1.2.4]: https://github.com/haraka/email-message/releases/tag/v1.2.4
