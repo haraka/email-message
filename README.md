@@ -6,10 +6,10 @@
 ## USAGE
 
 ```js
-const message = require('haraka-email-message');
-new message.Header(options);
-new message.Body(header, options);
-new message.stream(cfg, uuid, header_list);
+const message = require('haraka-email-message')
+new message.Header(options)
+new message.Body(header, options)
+new message.stream(cfg, uuid, header_list)
 ```
 
 ## Exports
