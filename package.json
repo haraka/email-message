@@ -35,11 +35,11 @@
     "@haraka/eslint-config": "^2.0.2"
   },
   "dependencies": {
-    "haraka-config": "^1.1.0",
-    "haraka-message-stream": "^1.2.1",
+    "haraka-config": "^1.4.2",
+    "haraka-message-stream": "^1.2.2",
     "iconv": "^3.0.1",
-    "libmime": "^5.3.4",
-    "libqp": "^2.1.0"
+    "libmime": "^5.3.6",
+    "libqp": "^2.1.1"
   },
   "prettier": {
     "singleQuote": true,

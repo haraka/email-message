@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### [1.2.5] - 2025-01-31
 
+- dep(all): bump to latest
 - dep(eslint): upgrade to v9
+- style(prettier): move config into package.json
 
 ### [1.2.4] - 2024-09-27
 
@@ -51,5 +53,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.1]: https://github.com/haraka/email-message/releases/tag/v1.2.1
 [1.2.2]: https://github.com/haraka/email-message/releases/tag/v1.2.2
 [1.2.3]: https://github.com/haraka/email-message/releases/tag/v1.2.3
-[1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
 [1.2.4]: https://github.com/haraka/email-message/releases/tag/v1.2.4
+[1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
