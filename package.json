@@ -37,7 +37,7 @@
   "dependencies": {
     "haraka-config": "^1.4.2",
     "haraka-message-stream": "^1.2.2",
-    "iconv": "^3.0.1",
+    "iconv-lite": "^0.6.3",
     "libmime": "^5.3.6",
     "libqp": "^2.1.1"
   },

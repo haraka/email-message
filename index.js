@@ -5,7 +5,7 @@ const config = require('haraka-config')
 const libmime = require('libmime')
 const libqp = require('libqp')
 const Stream = require('stream')
-const Iconv = require('iconv').Iconv
+const iconv = require('iconv-lite')
 
 let logger
 try {
@@ -77,7 +77,7 @@ class Header {
     // strip 822 comments in the most basic way - does not support nested comments
     // val = val.replace(/\([^\)]*\)/, '');
 
-    if (Iconv && !/^[\x00-\x7f]*$/.test(val)) {
+    if (!/^[\x00-\x7f]*$/.test(val)) {
       // 8 bit values in the header
       const matches = /\bcharset\s*=\s*["']?([\w_-]*)/.exec(
         this.get('content-type'),
@@ -85,7 +85,7 @@ class Header {
       if (matches && !/UTF-?8/i.test(matches[1])) {
         const encoding = matches[1]
         const source = Buffer.from(val, 'binary')
-        val = try_convert(source, encoding).toString()
+        val = try_convert(source, encoding)
       }
     }
 
@@ -184,24 +184,17 @@ class Header {
 
 function try_convert(data, encoding) {
   try {
-    const converter = new Iconv(encoding, 'UTF-8')
-    data = converter.convert(data)
+    // iconv.decode returns a UTF-8 string
+    return iconv.decode(data, encoding)
   } catch (err) {
     // TODO: raise a flag for this for possible scoring
+    // iconv-lite handles invalid sequences gracefully, but may throw
+    // on completely unsupported encodings - return original as string
     logger.logwarn(
-      `initial iconv conversion from ${encoding} to UTF-8 failed: ${err.message}`,
+      `iconv conversion from ${encoding} to UTF-8 failed: ${err.message}`,
     )
-    if (err.code !== 'EINVAL') {
-      try {
-        const converter = new Iconv(encoding, 'UTF-8//TRANSLIT//IGNORE')
-        data = converter.convert(data)
-      } catch (e) {
-        logger.logerror(`iconv from ${encoding} to UTF-8 failed: ${e.message}`)
-      }
-    }
+    return data.toString()
   }
-
-  return data
 }
 
 function _decode_header(matched, encoding, lang, cte, data) {
@@ -219,11 +212,11 @@ function _decode_header(matched, encoding, lang, cte, data) {
   }
 
   // convert with iconv if encoding != UTF-8
-  if (Iconv && !/UTF-?8/i.test(encoding)) {
-    data = try_convert(data, encoding)
+  if (!/UTF-?8/i.test(encoding)) {
+    return try_convert(data, encoding)
+  } else {
+    return data.toString()
   }
-
-  return data.toString()
 }
 
 function _decode_rfc2231(params, str) {
@@ -245,7 +238,10 @@ function _decode_rfc2231(params, str) {
     } catch (e) {
       logger.logerror(`Decode header failed: ${key}: ${merged}`)
     }
-    merged = params.cur_enc ? try_convert(merged, params.cur_enc) : merged
+
+    if (params.cur_enc) {
+      merged = try_convert(Buffer.from(merged, 'utf8'), params.cur_enc)
+    }
 
     str += `${merged}";`
   }
@@ -559,38 +555,21 @@ class Body extends events.EventEmitter {
   }
 
   try_iconv(buf, enc) {
-    if (!Iconv) {
-      this.body_encoding = 'no_iconv'
-      this.bodytext = buf.toString()
-      return
-    }
-
     if (/UTF-?8/i.test(enc)) {
       this.bodytext = buf.toString()
       return
     }
 
     try {
-      const converter = new Iconv(enc, 'UTF-8')
-      this.bodytext = converter.convert(buf).toString()
+      this.bodytext = iconv.decode(buf, enc)
     } catch (err) {
+      // iconv-lite handles invalid sequences gracefully, but may throw
+      // on completely unsupported encodings
       logger.logwarn(
-        `initial iconv conversion from ${enc} to UTF-8 failed: ${err.message}`,
+        `iconv conversion from ${enc} to UTF-8 failed: ${err.message}`,
       )
       this.body_encoding = `broken//${enc}`
-      // EINVAL is returned when the encoding type is not recognized/supported (e.g. ANSI_X3)
-      if (err.code !== 'EINVAL') {
-        // Perform the conversion again, but ignore any errors
-        try {
-          const converter = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE')
-          this.bodytext = converter.convert(buf).toString()
-        } catch (e) {
-          logger.logwarn(
-            `iconv conversion from ${enc} to UTF-8 failed: ${e.message}`,
-          )
-          this.bodytext = buf.toString()
-        }
-      }
+      this.bodytext = buf.toString()
     }
   }
 
@@ -784,13 +763,10 @@ function insert_banner(ct, enc, buf, cd, banners) {
   // First we convert the banner to the same encoding as the buf
   const banner_str = banners[is_html ? 1 : 0]
   let banner_buf = null
-  if (Iconv) {
-    try {
-      const converter = new Iconv('UTF-8', `${enc}//IGNORE`)
-      banner_buf = converter.convert(banner_str)
-    } catch (err) {
-      logger.logerror(`iconv conversion of banner to ${enc} failed: ${err}`)
-    }
+  try {
+    banner_buf = iconv.encode(banner_str, enc)
+  } catch (err) {
+    logger.logerror(`iconv conversion of banner to ${enc} failed: ${err}`)
   }
 
   if (!banner_buf) {
