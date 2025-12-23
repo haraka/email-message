@@ -32,7 +32,8 @@
   },
   "homepage": "https://github.com/haraka/email-message#readme",
   "devDependencies": {
-    "@haraka/eslint-config": "^2.0.2"
+    "@haraka/eslint-config": "^2.0.2",
+    "iconv": "^3.0.1"
   },
   "dependencies": {
     "haraka-config": "^1.4.2",
