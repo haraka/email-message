@@ -24,7 +24,7 @@ try {
   Iconv = require('iconv').Iconv
   logger.lognotice('Using iconv-lite with native iconv fallback for rare encodings')
 } catch (ignore) {
-  logger.lognotice('Using iconv-lite only. To support rare encodings, install: npm install iconv')
+  logger.lognotice('Using iconv-lite only. To support rare encodings: npm install iconv')
 }
 
 const buf_siz = config.get('mailparser.bufsize') || 65536
