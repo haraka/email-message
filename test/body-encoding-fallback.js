@@ -19,7 +19,9 @@ describe('encoding fallback', function () {
       body.parse_end()
 
       assert.ok(body.bodytext.includes('Caf'))
-      assert.ok(body.bodytext.includes('é') || body.bodytext.charCodeAt(3) === 0xe9)
+      assert.ok(
+        body.bodytext.includes('é') || body.bodytext.charCodeAt(3) === 0xe9,
+      )
       done()
     })
 
@@ -44,7 +46,7 @@ describe('encoding fallback', function () {
       let Iconv
       try {
         Iconv = require('iconv').Iconv
-      } catch (e) {
+      } catch (ignore) {
         this.skip()
       }
 
