@@ -22,9 +22,10 @@ try {
 let Iconv
 try {
   Iconv = require('iconv').Iconv
-  logger.lognotice('Using iconv-lite with native iconv fallback for rare encodings')
 } catch (ignore) {
-  logger.lognotice('Using iconv-lite only. To support rare encodings: npm install iconv')
+  logger.lognotice(
+    'Using iconv-lite only. To support rare encodings: npm install iconv',
+  )
 }
 
 const buf_siz = config.get('mailparser.bufsize') || 65536
@@ -166,7 +167,7 @@ class Header {
 
   _add_header_decode(key, value, method) {
     const val = this.decode_header(value)
-    // console.log(key + ': ' + val);
+    // console.log(`${key}: ${val}`);
     this.headers_decoded[key] = this.headers_decoded[key] || []
     this.headers_decoded[key][method](val)
   }
@@ -195,17 +196,21 @@ function try_convert(data, encoding) {
   // Prefer iconv-lite; use iconv as a fallback if available.
   try {
     return iconv.decode(data, encoding)
-  } catch (err) {
+  } catch (ignore) {
     // TODO: raise a flag for this for possible scoring
     if (Iconv) {
       try {
         const converter = new Iconv(encoding, 'UTF-8//TRANSLIT//IGNORE')
         return converter.convert(data).toString()
       } catch (iconvErr) {
-        logger.logwarn(`iconv conversion from ${encoding} to UTF-8 failed: ${iconvErr.message}`)
+        logger.logwarn(
+          `iconv conversion from ${encoding} to UTF-8 failed: ${iconvErr.message}`,
+        )
       }
     } else {
-      logger.logwarn(`iconv-lite doesn't support encoding '${encoding}'. Install iconv for rare encoding support: npm install iconv`)
+      logger.logwarn(
+        `iconv-lite doesn't support encoding '${encoding}'. Install iconv for rare encoding support: npm install iconv`,
+      )
     }
 
     return data.toString()
@@ -250,7 +255,7 @@ function _decode_rfc2231(params, str) {
 
     try {
       merged = decodeURIComponent(merged)
-    } catch (e) {
+    } catch (ignore) {
       logger.logerror(`Decode header failed: ${key}: ${merged}`)
     }
 
@@ -578,17 +583,21 @@ class Body extends events.EventEmitter {
     // Prefer iconv-lite; use iconv as a fallback if available.
     try {
       this.bodytext = iconv.decode(buf, enc)
-    } catch (err) {
+    } catch (ignore) {
       if (Iconv) {
         try {
           const converter = new Iconv(enc, 'UTF-8//TRANSLIT//IGNORE')
           this.bodytext = converter.convert(buf).toString()
           return
         } catch (iconvErr) {
-          logger.logwarn(`iconv conversion from ${enc} to UTF-8 failed: ${iconvErr.message}`)
+          logger.logwarn(
+            `iconv conversion from ${enc} to UTF-8 failed: ${iconvErr.message}`,
+          )
         }
       } else {
-        logger.logwarn(`iconv-lite doesn't support encoding '${enc}'. Install iconv for rare encoding support: npm install iconv`)
+        logger.logwarn(
+          `iconv-lite doesn't support encoding '${enc}'. Install iconv for rare encoding support: npm install iconv`,
+        )
       }
       this.body_encoding = `broken//${enc}`
       this.bodytext = buf.toString()
@@ -787,16 +796,20 @@ function insert_banner(ct, enc, buf, cd, banners) {
   let banner_buf = null
   try {
     banner_buf = iconv.encode(banner_str, enc)
-  } catch (err) {
+  } catch (ignore) {
     if (Iconv) {
       try {
         const converter = new Iconv('UTF-8', `${enc}//IGNORE`)
         banner_buf = converter.convert(banner_str)
       } catch (iconvErr) {
-        logger.logerror(`iconv conversion of banner to ${enc} failed: ${iconvErr}`)
+        logger.logerror(
+          `iconv conversion of banner to ${enc} failed: ${iconvErr}`,
+        )
       }
     } else {
-      logger.logerror(`iconv-lite doesn't support encoding '${enc}' for banner conversion`)
+      logger.logerror(
+        `iconv-lite doesn't support encoding '${enc}' for banner conversion`,
+      )
     }
   }
 
