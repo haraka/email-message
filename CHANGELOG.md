@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.2.6] - 2025-12-23
+
+- feat: use iconv-lite by default
+  - on conversion error, if iconv is installed (manually), try it
+- deps(all): bump to latest
+
 ### [1.2.5] - 2025-01-31
 
 - dep(all): bump to latest
@@ -55,3 +61,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.3]: https://github.com/haraka/email-message/releases/tag/v1.2.3
 [1.2.4]: https://github.com/haraka/email-message/releases/tag/v1.2.4
 [1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
+[1.2.6]: https://github.com/haraka/email-message/releases/tag/v1.2.6
