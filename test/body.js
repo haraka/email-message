@@ -88,15 +88,14 @@ function _fill_empty_body(body) {
 
 describe('body', function () {
   describe('basic', function () {
-    it('children', function (done) {
+    it('children', function () {
       const body = new Body()
       _fill_body(body)
 
       assert.equal(body.children.length, 2)
-      done()
     })
 
-    it('correct mime parsing (#2548)', function (done) {
+    it('correct mime parsing (#2548)', function () {
       const tests = [
         [
           'utf-8',
@@ -170,23 +169,20 @@ describe('body', function () {
           `charset: ${data[0]}, encoding: ${data[1]}`,
         )
       })
-
-      done()
     })
   })
 
   describe('banners', function () {
-    it('banner', function (done) {
+    it('banner', function () {
       const body = new Body()
       body.set_banner(['A text banner', 'An HTML banner'])
       const parts = _fill_body(body)
 
       assert.ok(/A text banner$/.test(parts[0]))
       assert.ok(/<P>An HTML banner<\/P>$/.test(parts[1]))
-      done()
     })
 
-    it('insert_banner', function (done) {
+    it('insert_banner', function () {
       let content_type
       let buf
       let new_buf
@@ -216,13 +212,11 @@ describe('body', function () {
         'winter\ntextbanner\n',
         'text banner looks ok',
       )
-
-      done()
     })
 
     // found and fixed bug, if the buffer is empty this was throwing a:
     // RangeError: out of range index
-    it('insert_banner_empty_buffer', function (done) {
+    it('insert_banner_empty_buffer', function () {
       let content_type
       let new_buf
       const enc = 'UTF-8'
@@ -250,11 +244,9 @@ describe('body', function () {
         '\ntextbanner\n',
         'empty text part gets a banner',
       )
-
-      done()
     })
 
-    it('insert_banner_empty_body', function (done) {
+    it('insert_banner_empty_body', function () {
       const body = new Body()
       const banners = ['textbanner', 'htmlbanner']
 
@@ -263,23 +255,20 @@ describe('body', function () {
 
       assert.equal(results[0], banners[0])
       assert.equal(results[1], `<P>${banners[1]}</P>`)
-
-      done()
     })
   })
 
   describe('filters', function () {
-    it('empty', function (done) {
+    it('empty', function () {
       const body = new Body()
       body.add_filter((ct, enc, buf) => {})
       const parts = _fill_body(body)
 
       assert.ok(/Some text/.test(parts[0]))
       assert.ok(/This is some HTML/.test(parts[1]))
-      done()
     })
 
-    it('search/replace', function (done) {
+    it('search/replace', function () {
       const body = new Body()
       body.add_filter((ct, enc, buf) => {
         if (/^text\/plain/.test(ct)) {
@@ -292,10 +281,9 @@ describe('body', function () {
 
       assert.equal(parts[0], 'TEXT FILTERED')
       assert.equal(parts[1], '<p>HTML FILTERED</p>')
-      done()
     })
 
-    it('regression: duplicate multi-part preamble when filters added', function (done) {
+    it('regression: duplicate multi-part preamble when filters added', function () {
       const body = new Body()
       body.add_filter(() => {})
 
@@ -328,12 +316,11 @@ describe('body', function () {
       }
 
       assert.ok(!dupe, 'no duplicate lines found')
-      done()
     })
   })
 
   describe('rfc2231', function () {
-    it('multi-value', function (done) {
+    it('multi-value', function () {
       const body = new Body()
       _fill_body(body)
 
@@ -351,10 +338,9 @@ describe('body', function () {
             'filename="marketron_lbasubmission_FTA Cricket Brentwood 3006445 Jackson TN_08282017.xlsx"',
           ) > 0,
       )
-      done()
     })
 
-    it('enc-and-lang', function (done) {
+    it('enc-and-lang', function () {
       const body = new Body()
       _fill_body(body)
 
@@ -363,10 +349,9 @@ describe('body', function () {
           .get_decoded('content-type')
           .indexOf('title="This is ***fun***";') > 0,
       )
-      done()
     })
 
-    it('multi-value-enc-and-lang', function (done) {
+    it('multi-value-enc-and-lang', function () {
       const body = new Body()
       _fill_body(body)
 
@@ -375,33 +360,29 @@ describe('body', function () {
           .get_decoded('content-type')
           .indexOf('title="This is even more ***fun*** isn\'t it!";') > 0,
       )
-      done()
     })
   })
 
   describe('boundaries', function () {
-    it('with-quotes', function (done) {
+    it('with-quotes', function () {
       const body = new Body()
       _fill_body(body, '"')
 
       assert.equal(body.children.length, 2)
-      done()
     })
 
-    it('without-quotes', function (done) {
+    it('without-quotes', function () {
       const body = new Body()
       _fill_body(body, '')
 
       assert.equal(body.children.length, 2)
-      done()
     })
 
-    it('with-bad-quotes', function (done) {
+    it('with-bad-quotes', function () {
       const body = new Body()
       _fill_body(body, "'")
 
       assert.equal(body.children.length, 0)
-      done()
     })
   })
 
