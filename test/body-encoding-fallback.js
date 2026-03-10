@@ -6,7 +6,7 @@ const Body = require('../index').Body
 
 describe('encoding fallback', function () {
   describe('iconv-lite primary path', function () {
-    it('uses iconv-lite for common encoding (ISO-8859-1)', function (done) {
+    it('uses iconv-lite for common encoding (ISO-8859-1)', function () {
       const body = new Body()
       body.state = 'headers'
       ;[
@@ -22,10 +22,9 @@ describe('encoding fallback', function () {
       assert.ok(
         body.bodytext.includes('é') || body.bodytext.charCodeAt(3) === 0xe9,
       )
-      done()
     })
 
-    it('uses iconv-lite for UTF-8', function (done) {
+    it('uses iconv-lite for UTF-8', function () {
       const body = new Body()
       body.state = 'headers'
       ;[
@@ -37,12 +36,11 @@ describe('encoding fallback', function () {
       body.parse_end()
 
       assert.equal(body.bodytext, 'Hello World')
-      done()
     })
   })
 
   describe('iconv fallback path', function () {
-    it('verifies native iconv is loaded as fallback', function (done) {
+    it('verifies native iconv is loaded as fallback', function () {
       let Iconv
       try {
         Iconv = require('iconv').Iconv
@@ -54,10 +52,9 @@ describe('encoding fallback', function () {
 
       const converter = new Iconv('ISO-8859-1', 'UTF-8')
       assert.ok(converter, 'Should be able to create iconv converter')
-      done()
     })
 
-    it('attempts iconv fallback for unsupported encoding', function (done) {
+    it('attempts iconv fallback for unsupported encoding', function () {
       const body = new Body()
       body.state = 'headers'
 
@@ -72,12 +69,11 @@ describe('encoding fallback', function () {
 
       assert.ok(body.bodytext.length > 0)
       assert.ok(body.bodytext.includes('Test'))
-      done()
     })
   })
 
   describe('final fallback path', function () {
-    it('falls back to toString for completely unsupported encoding', function (done) {
+    it('falls back to toString for completely unsupported encoding', function () {
       const body = new Body()
       body.state = 'headers'
       ;[
@@ -90,10 +86,9 @@ describe('encoding fallback', function () {
 
       assert.ok(body.bodytext.length > 0)
       assert.equal(body.body_encoding, 'broken//FAKE-ENCODING')
-      done()
     })
 
-    it('handles toString fallback gracefully', function (done) {
+    it('handles toString fallback gracefully', function () {
       const body = new Body()
       body.state = 'headers'
       ;[
@@ -106,7 +101,6 @@ describe('encoding fallback', function () {
 
       assert.equal(body.bodytext, 'Plain ASCII')
       assert.equal(body.body_encoding, 'broken//INVALID')
-      done()
     })
   })
 })
