@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.3.0] - 2026-03-24
+
+- change: split index.js into `lib/` files
+- style(esnext): some updates
+  - private fields (#)
+- doc(README): practical makeover
+- test: organize the test suite
+- test: switch test runner from mocha to node --test
+
 ### [1.2.7] - 2026-03-23
 
 - fix: Buffer.alloc was being called on empty Buffer causing crash
@@ -75,3 +84,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
 [1.2.6]: https://github.com/haraka/email-message/releases/tag/v1.2.6
 [1.2.7]: https://github.com/haraka/email-message/releases/tag/v1.2.7
+[1.3.0]: https://github.com/haraka/email-message/releases/tag/v1.3.0
