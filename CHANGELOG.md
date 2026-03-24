@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.2.7] - 2026-03-23
+
+- fix: Buffer.alloc was being called on empty Buffer causing crash
+- deps(all): bumped versions to latest
+- test: added functional tests, covering:
+  - plain text, multipart/alternative, multipart/mixed, nested multiparts
+  - base64, quoted-printable, and 8bit transfer encodings
+- test: remove unnecessary done callbacks in synchronous tests #16
+
 ### [1.2.6] - 2025-12-23
 
 - feat: use iconv-lite by default
@@ -62,3 +71,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.4]: https://github.com/haraka/email-message/releases/tag/v1.2.4
 [1.2.5]: https://github.com/haraka/email-message/releases/tag/v1.2.5
 [1.2.6]: https://github.com/haraka/email-message/releases/tag/v1.2.6
+[1.2.7]: https://github.com/haraka/email-message/releases/tag/v1.2.7

@@ -1,10 +1,10 @@
 'use strict'
 
-const events = require('events')
+const events = require('node:events')
+const Stream = require('node:stream')
 const config = require('haraka-config')
 const libmime = require('libmime')
 const libqp = require('libqp')
-const Stream = require('stream')
 const iconv = require('iconv-lite')
 
 let logger
@@ -617,10 +617,9 @@ class Body extends events.EventEmitter {
       let new_size = this.body_text_encoded.length * 2
       while (this.body_text_encoded_pos + line.length > new_size) new_size *= 2
 
-      this.body_text_encoded = Buffer.alloc(
-        new_size,
-        this.body_text_encoded.slice(0, this.body_text_encoded_pos),
-      )
+      const new_buf = Buffer.alloc(new_size)
+      this.body_text_encoded.copy(new_buf, 0, 0, this.body_text_encoded_pos)
+      this.body_text_encoded = new_buf
     }
 
     line.copy(this.body_text_encoded, this.body_text_encoded_pos)
