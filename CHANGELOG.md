@@ -11,7 +11,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - test: added functional tests, covering:
   - plain text, multipart/alternative, multipart/mixed, nested multiparts
   - base64, quoted-printable, and 8bit transfer encodings
+  - edge cases: malformed headers, missing multipart boundaries, and base64 wrapping with irregular line lengths and spaces.
+  - backpressure: test for AttachmentStream pause()/resume()
 - test: remove unnecessary done callbacks in synchronous tests #16
+- doc(README): added coverage badge
 
 ### [1.2.6] - 2025-12-23
 

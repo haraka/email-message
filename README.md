@@ -1,5 +1,6 @@
 [![CI Test Status][ci-img]][ci-url]
 [![Code Climate][clim-img]][clim-url]
+[![Test Coverage][cov-img]][cov-url]
 
 # haraka-email-message
 
@@ -19,8 +20,6 @@ new message.stream(cfg, uuid, header_list)
 - stream (a [haraka-message-stream](https://github.com/haraka/message-stream))
 
 ## Header
-
-=============
 
 The Header object gives programmatic access to email headers. It is primarily
 used from `transaction.header` but also each MIME part of the `Body` will
@@ -95,3 +94,5 @@ children, one text/plain and one text/html.
 [ci-url]: https://github.com/haraka/email-message/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/email-message/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/email-message
+[cov-img]: https://coveralls.io/repos/github/haraka/email-message/badge.svg
+[cov-url]: https://coveralls.io/github/haraka/email-message
