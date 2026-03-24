@@ -1,4 +1,5 @@
-const assert = require('assert')
+const { describe, it } = require('node:test')
+const assert = require('node:assert')
 const { Body, Header } = require('../index')
 
 function parseMessage(lines) {
@@ -22,7 +23,7 @@ function parseMessage(lines) {
   return body
 }
 
-describe('functional parsing', function () {
+describe('parsing', function () {
   it('parses a simple plain text email', function () {
     const lines = [
       'From: sender@example.com\n',
@@ -70,108 +71,127 @@ describe('functional parsing', function () {
     assert.equal(body.children[1].bodytext.trim(), '<p>HTML version.</p>')
   })
 
-  it('parses a multipart/mixed email with attachment', function (done) {
-    const lines = [
-      'From: sender@example.com\n',
-      'To: receiver@example.com\n',
-      'Subject: Attachment Test\n',
-      'Content-Type: multipart/mixed; boundary=boundary123\n',
-      '\n',
-      '--boundary123\n',
-      'Content-Type: text/plain; charset=utf-8\n',
-      '\n',
-      'See attached file.\n',
-      '--boundary123\n',
-      'Content-Type: application/octet-stream; name="test.txt"\n',
-      'Content-Disposition: attachment; filename="test.txt"\n',
-      'Content-Transfer-Encoding: base64\n',
-      '\n',
-      Buffer.from('Hello World').toString('base64') + '\n',
-      '--boundary123--\n',
-    ]
+  it('parses a multipart/mixed email with attachment', () =>
+    new Promise((resolve, reject) => {
+      const lines = [
+        'From: sender@example.com\n',
+        'To: receiver@example.com\n',
+        'Subject: Attachment Test\n',
+        'Content-Type: multipart/mixed; boundary=boundary123\n',
+        '\n',
+        '--boundary123\n',
+        'Content-Type: text/plain; charset=utf-8\n',
+        '\n',
+        'See attached file.\n',
+        '--boundary123\n',
+        'Content-Type: application/octet-stream; name="test.txt"\n',
+        'Content-Disposition: attachment; filename="test.txt"\n',
+        'Content-Transfer-Encoding: base64\n',
+        '\n',
+        Buffer.from('Hello World').toString('base64') + '\n',
+        '--boundary123--\n',
+      ]
 
-    const header = new Header()
-    header.parse(lines.slice(0, 4))
-    const body = new Body(header)
+      const header = new Header()
+      header.parse(lines.slice(0, 4))
+      const body = new Body(header)
 
-    let attachmentFound = false
-    body.on('attachment_start', (ct, filename, part, stream) => {
-      attachmentFound = true
-      assert.ok(ct.includes('application/octet-stream'))
-      assert.equal(filename, 'test.txt')
+      body.on('attachment_start', (ct, filename, part, stream) => {
+        try {
+          assert.ok(ct.includes('application/octet-stream'))
+          assert.equal(filename, 'test.txt')
+        } catch (err) {
+          reject(err)
+          return
+        }
 
-      let data = Buffer.alloc(0)
-      stream.on('data', (chunk) => {
-        data = Buffer.concat([data, chunk])
+        let data = Buffer.alloc(0)
+        stream.on('data', (chunk) => {
+          data = Buffer.concat([data, chunk])
+        })
+        stream.on('end', () => {
+          try {
+            assert.equal(data.toString(), 'Hello World')
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        })
       })
-      stream.on('end', () => {
-        assert.equal(data.toString(), 'Hello World')
-        if (attachmentFound) done()
+
+      for (let i = 5; i < lines.length; i++) body.parse_more(lines[i])
+      body.parse_end()
+    }))
+
+  it('parses nested multiparts', () =>
+    new Promise((resolve, reject) => {
+      const lines = [
+        'Content-Type: multipart/mixed; boundary=outer\n',
+        '\n',
+        '--outer\n',
+        'Content-Type: multipart/alternative; boundary=inner\n',
+        '\n',
+        '--inner\n',
+        'Content-Type: text/plain\n',
+        '\n',
+        'Inner text\n',
+        '--inner\n',
+        'Content-Type: text/html\n',
+        '\n',
+        '<b>Inner html</b>\n',
+        '--inner--\n',
+        '--outer\n',
+        'Content-Type: text/plain\n',
+        'Content-Disposition: attachment; filename="outer.txt"\n',
+        '\n',
+        'Outer attachment\n',
+        '--outer--\n',
+      ]
+
+      const header = new Header()
+      header.parse(lines.slice(0, 1))
+      const body = new Body(header)
+
+      let outerAttachmentData = Buffer.alloc(0)
+
+      body.on('attachment_start', (ct, filename, part, stream) => {
+        try {
+          assert.equal(filename, 'outer.txt')
+        } catch (err) {
+          reject(err)
+          return
+        }
+        stream.on('data', (chunk) => {
+          outerAttachmentData = Buffer.concat([outerAttachmentData, chunk])
+        })
+        stream.on('end', () => {
+          try {
+            assert.equal(
+              outerAttachmentData.toString().trim(),
+              'Outer attachment',
+            )
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        })
       })
-    })
 
-    for (let i = 5; i < lines.length; i++) {
-      body.parse_more(lines[i])
-    }
-    body.parse_end()
-  })
+      for (let i = 2; i < lines.length; i++) body.parse_more(lines[i])
+      body.parse_end()
 
-  it('parses nested multiparts', function (done) {
-    const lines = [
-      'Content-Type: multipart/mixed; boundary=outer\n',
-      '\n',
-      '--outer\n',
-      'Content-Type: multipart/alternative; boundary=inner\n',
-      '\n',
-      '--inner\n',
-      'Content-Type: text/plain\n',
-      '\n',
-      'Inner text\n',
-      '--inner\n',
-      'Content-Type: text/html\n',
-      '\n',
-      '<b>Inner html</b>\n',
-      '--inner--\n',
-      '--outer\n',
-      'Content-Type: text/plain\n',
-      'Content-Disposition: attachment; filename="outer.txt"\n',
-      '\n',
-      'Outer attachment\n',
-      '--outer--\n',
-    ]
-
-    const header = new Header()
-    header.parse(lines.slice(0, 1))
-    const body = new Body(header)
-
-    let outerAttachmentData = Buffer.alloc(0)
-    let attachmentStarted = false
-
-    body.on('attachment_start', (ct, filename, part, stream) => {
-      attachmentStarted = true
-      assert.equal(filename, 'outer.txt')
-      stream.on('data', (chunk) => {
-        outerAttachmentData = Buffer.concat([outerAttachmentData, chunk])
-      })
-      stream.on('end', () => {
-        assert.equal(outerAttachmentData.toString().trim(), 'Outer attachment')
-        done()
-      })
-    })
-
-    for (let i = 2; i < lines.length; i++) {
-      body.parse_more(lines[i])
-    }
-    body.parse_end()
-
-    assert.equal(body.children.length, 2)
-    assert.equal(body.children[0].children.length, 2)
-    assert.equal(body.children[0].children[0].bodytext.trim(), 'Inner text')
-    assert.equal(
-      body.children[0].children[1].bodytext.trim(),
-      '<b>Inner html</b>',
-    )
-  })
+      try {
+        assert.equal(body.children.length, 2)
+        assert.equal(body.children[0].children.length, 2)
+        assert.equal(body.children[0].children[0].bodytext.trim(), 'Inner text')
+        assert.equal(
+          body.children[0].children[1].bodytext.trim(),
+          '<b>Inner html</b>',
+        )
+      } catch (err) {
+        reject(err)
+      }
+    }))
 
   it('handles base64 transfer encoding in body', function () {
     const content = 'This is a base64 encoded body.'
@@ -258,65 +278,61 @@ describe('functional parsing', function () {
       assert.equal(body.bodytext.trim(), content)
     })
 
-    it('handles AttachmentStream pause/resume', function (done) {
-      const largeContent = 'b'.repeat(100000)
-      const lines = [
-        'Content-Type: application/octet-stream; name="pause.txt"\n',
-        'Content-Disposition: attachment; filename="pause.txt"\n',
-        'Content-Transfer-Encoding: base64\n',
-        '\n',
-        Buffer.from(largeContent).toString('base64') + '\n',
-      ]
+    it('handles AttachmentStream pause/resume', () =>
+      new Promise((resolve, reject) => {
+        const largeContent = 'b'.repeat(100000)
+        const lines = [
+          'Content-Type: application/octet-stream; name="pause.txt"\n',
+          'Content-Disposition: attachment; filename="pause.txt"\n',
+          'Content-Transfer-Encoding: base64\n',
+          '\n',
+          Buffer.from(largeContent).toString('base64') + '\n',
+        ]
 
-      const header = new Header()
-      header.parse(lines.slice(0, 3))
-      const body = new Body(header)
+        const header = new Header()
+        header.parse(lines.slice(0, 3))
+        const body = new Body(header)
 
-      body.on('attachment_start', (ct, filename, part, stream) => {
-        let receivedData = Buffer.alloc(0)
-        stream.pause()
+        body.on('attachment_start', (ct, filename, part, stream) => {
+          let receivedData = Buffer.alloc(0)
+          stream.pause()
 
-        let pauseVerified = false
-        stream.on('data', (chunk) => {
-          receivedData = Buffer.concat([receivedData, chunk])
-          if (pauseVerified) {
-            // Good, we are receiving after resume
-          } else {
-            // If we get data while paused (and it wasn't already in flight), that's a problem
-            // But since we are calling pause() immediately, it's possible some initial data
-            // might be emitted if it was already synchronously pushed.
-            // However, our implementation of emit_data checks this.paused.
-          }
+          stream.on('data', (chunk) => {
+            receivedData = Buffer.concat([receivedData, chunk])
+          })
+          stream.on('end', () => {
+            try {
+              assert.equal(receivedData.toString(), largeContent)
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+
+          setTimeout(() => {
+            try {
+              assert.equal(
+                receivedData.length,
+                0,
+                'Should not have received data while paused',
+              )
+              stream.resume()
+            } catch (err) {
+              reject(err)
+            }
+          }, 10)
         })
 
-        stream.on('end', () => {
-          assert.equal(receivedData.toString(), largeContent)
-          done()
-        })
-
-        setTimeout(() => {
-          pauseVerified = true
-          assert.equal(
-            receivedData.length,
-            0,
-            'Should not have received data while paused',
-          )
-          stream.resume()
-        }, 10)
-      })
-
-      for (let i = 4; i < lines.length; i++) {
-        body.parse_more(lines[i])
-      }
-      body.parse_end()
-    })
+        for (let i = 4; i < lines.length; i++) body.parse_more(lines[i])
+        body.parse_end()
+      }))
   })
 
   describe('fixtures', function () {
     const fs = require('node:fs')
     const path = require('node:path')
 
-    it('parses haraka-icon-attach.eml', function (done) {
+    it('parses haraka-icon-attach.eml', function () {
       const eml = fs.readFileSync(
         path.join(__dirname, 'fixtures', 'haraka-icon-attach.eml'),
       )
@@ -344,10 +360,9 @@ describe('functional parsing', function () {
 
       assert.ok(attachmentSeen)
       assert.equal(body.children.length, 2)
-      done()
     })
 
-    it('parses haraka-tarball-attach.eml', function (done) {
+    it('parses haraka-tarball-attach.eml', function () {
       const eml = fs.readFileSync(
         path.join(__dirname, 'fixtures', 'haraka-tarball-attach.eml'),
       )
@@ -375,7 +390,6 @@ describe('functional parsing', function () {
 
       assert.ok(attachmentSeen)
       assert.equal(body.children.length, 2)
-      done()
     })
   })
 })

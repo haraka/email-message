@@ -1,6 +1,6 @@
-const assert = require('assert')
-
-const Body = require('../index').Body
+const { describe, it } = require('node:test')
+const assert = require('node:assert')
+const Body = require('../../lib/body')
 
 function _fill_body(body, quote) {
   // Body.bodytext retains the original received text before filters are
@@ -57,11 +57,6 @@ function _fill_body(body, quote) {
 }
 
 function _fill_empty_body(body) {
-  // Body.bodytext retains the original received text before filters are
-  // applied so the filtered text isn't tested against URIBLs, etc.  Since we
-  // want to test filter output, we use this hack to pull out the parsed body
-  // parts that will be passed onward to the transaction.
-
   body.state = 'headers'
   body.parse_more('Content-Type: multipart/alternative; boundary=abcdef\n')
   body.parse_more('\n')
@@ -191,7 +186,6 @@ describe('body', function () {
       const body = new Body()
       const banners = ['textbanner', 'htmlbanner']
 
-      // this is a kind of roundabout way to get at the insert_banners code
       body.set_banner(banners)
       const insert_banners_fn = body.filters[0]
 
@@ -214,8 +208,6 @@ describe('body', function () {
       )
     })
 
-    // found and fixed bug, if the buffer is empty this was throwing a:
-    // RangeError: out of range index
     it('insert_banner_empty_buffer', function () {
       let content_type
       let new_buf
@@ -224,7 +216,6 @@ describe('body', function () {
       const body = new Body()
       const banners = ['textbanner', 'htmlbanner']
 
-      // this is a kind of roundabout way to get at the insert_banners code
       body.set_banner(banners)
       const insert_banners_fn = body.filters[0]
 
@@ -388,61 +379,180 @@ describe('body', function () {
 
   describe('attachments', function () {
     describe('content-type-name', function () {
-      it('with-quotes', function (done) {
-        const body = new Body()
-        body.on('attachment_start', (ct, filename) => {
-          assert.equal(filename, 'aaaa.zip')
-          done()
-        })
-        body.header.parse(['Content-Type: application/zip; name="aaaa.zip"'])
-        body.parse_start('')
-      })
+      it('with-quotes', () =>
+        new Promise((resolve, reject) => {
+          const body = new Body()
+          body.on('attachment_start', (ct, filename) => {
+            try {
+              assert.equal(filename, 'aaaa.zip')
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+          body.header.parse(['Content-Type: application/zip; name="aaaa.zip"'])
+          body.parse_start('')
+        }))
 
-      it('without-quotes', function (done) {
-        const body = new Body()
-        body.on('attachment_start', (ct, filename) => {
-          assert.equal(filename, 'aaaa.zip')
-          done()
-        })
-        body.header.parse(['Content-Type: application/zip; name=aaaa.zip'])
-        body.parse_start('')
-      })
+      it('without-quotes', () =>
+        new Promise((resolve, reject) => {
+          const body = new Body()
+          body.on('attachment_start', (ct, filename) => {
+            try {
+              assert.equal(filename, 'aaaa.zip')
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+          body.header.parse(['Content-Type: application/zip; name=aaaa.zip'])
+          body.parse_start('')
+        }))
 
-      it('with-quotes-and-semicolons', function (done) {
-        const body = new Body()
-        body.on('attachment_start', (ct, filename) => {
-          assert.equal(filename, 'aaaa; bbb; cccc.zip')
-          done()
-        })
-        body.header.parse([
-          'Content-Type: application/zip; name="aaaa; bbb; cccc.zip"',
-        ])
-        body.parse_start('')
-      })
+      it('with-quotes-and-semicolons', () =>
+        new Promise((resolve, reject) => {
+          const body = new Body()
+          body.on('attachment_start', (ct, filename) => {
+            try {
+              assert.equal(filename, 'aaaa; bbb; cccc.zip')
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+          body.header.parse([
+            'Content-Type: application/zip; name="aaaa; bbb; cccc.zip"',
+          ])
+          body.parse_start('')
+        }))
 
-      it('with-one-quote-left', function (done) {
-        const body = new Body()
-        body.on('attachment_start', (ct, filename) => {
-          assert.equal(filename, 'aaaa')
-          done()
-        })
-        body.header.parse([
-          'Content-Type: application/zip; name="aaaa; bbb; cccc.zip',
-        ])
-        body.parse_start('')
-      })
+      it('with-one-quote-left', () =>
+        new Promise((resolve, reject) => {
+          const body = new Body()
+          body.on('attachment_start', (ct, filename) => {
+            try {
+              assert.equal(filename, 'aaaa')
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+          body.header.parse([
+            'Content-Type: application/zip; name="aaaa; bbb; cccc.zip',
+          ])
+          body.parse_start('')
+        }))
 
-      it('with-one-quote-right', function (done) {
-        const body = new Body()
-        body.on('attachment_start', (ct, filename) => {
-          assert.equal(filename, 'aaaa')
-          done()
-        })
-        body.header.parse([
-          'Content-Type: application/zip; name=aaaa; bbb; cccc.zip"',
-        ])
-        body.parse_start('')
-      })
+      it('with-one-quote-right', () =>
+        new Promise((resolve, reject) => {
+          const body = new Body()
+          body.on('attachment_start', (ct, filename) => {
+            try {
+              assert.equal(filename, 'aaaa')
+              resolve()
+            } catch (err) {
+              reject(err)
+            }
+          })
+          body.header.parse([
+            'Content-Type: application/zip; name=aaaa; bbb; cccc.zip"',
+          ])
+          body.parse_start('')
+        }))
+    })
+  })
+
+  describe('encoding', function () {
+    it('uses iconv-lite for common encoding (ISO-8859-1)', function () {
+      const body = new Body()
+      body.state = 'headers'
+      ;[
+        'Content-Type: text/plain; charset=iso-8859-1\n',
+        'Content-Transfer-Encoding: 8bit\n',
+        '\n',
+        // 0xE9 = é in ISO-8859-1
+        Buffer.from([0x43, 0x61, 0x66, 0xe9]),
+      ].forEach((line) => body.parse_more(line))
+      body.parse_end()
+
+      assert.ok(body.bodytext.includes('Caf'))
+      assert.ok(
+        body.bodytext.includes('é') || body.bodytext.charCodeAt(3) === 0xe9,
+      )
+    })
+
+    it('uses iconv-lite for UTF-8', function () {
+      const body = new Body()
+      body.state = 'headers'
+      ;[
+        'Content-Type: text/plain; charset=utf-8\n',
+        'Content-Transfer-Encoding: 8bit\n',
+        '\n',
+        Buffer.from('Hello World'),
+      ].forEach((line) => body.parse_more(line))
+      body.parse_end()
+
+      assert.equal(body.bodytext, 'Hello World')
+    })
+
+    it('verifies native iconv is loaded as fallback', (t) => {
+      let Iconv
+      try {
+        Iconv = require('iconv').Iconv
+      } catch (ignore) {
+        t.skip()
+        return
+      }
+
+      assert.ok(Iconv, 'Native iconv should be loaded')
+
+      const converter = new Iconv('ISO-8859-1', 'UTF-8')
+      assert.ok(converter, 'Should be able to create iconv converter')
+    })
+
+    it('attempts iconv fallback for unsupported encoding', function () {
+      const body = new Body()
+      body.state = 'headers'
+      ;[
+        'Content-Type: text/plain; charset=x-mac-cyrillic\n',
+        'Content-Transfer-Encoding: 8bit\n',
+        '\n',
+        Buffer.from('Test'),
+      ].forEach((line) => body.parse_more(line))
+      body.parse_end()
+
+      assert.ok(body.bodytext.length > 0)
+      assert.ok(body.bodytext.includes('Test'))
+    })
+
+    it('falls back to toString for completely unsupported encoding', function () {
+      const body = new Body()
+      body.state = 'headers'
+      ;[
+        'Content-Type: text/plain; charset=FAKE-ENCODING\n',
+        'Content-Transfer-Encoding: 8bit\n',
+        '\n',
+        Buffer.from('ASCII text'),
+      ].forEach((line) => body.parse_more(line))
+      body.parse_end()
+
+      assert.ok(body.bodytext.length > 0)
+      assert.equal(body.body_encoding, 'broken//FAKE-ENCODING')
+    })
+
+    it('handles toString fallback gracefully', function () {
+      const body = new Body()
+      body.state = 'headers'
+      ;[
+        'Content-Type: text/plain; charset=INVALID\n',
+        'Content-Transfer-Encoding: 8bit\n',
+        '\n',
+        Buffer.from('Plain ASCII'),
+      ].forEach((line) => body.parse_more(line))
+      body.parse_end()
+
+      assert.equal(body.bodytext, 'Plain ASCII')
+      assert.equal(body.body_encoding, 'broken//INVALID')
     })
   })
 })
