@@ -23,7 +23,7 @@ function parseMessage(lines) {
   return body
 }
 
-describe('functional parsing', function () {
+describe('parsing', function () {
   it('parses a simple plain text email', function () {
     const lines = [
       'From: sender@example.com\n',
