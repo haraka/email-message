@@ -62,4 +62,5 @@ bower_components
 .npmrc
 .idea
 .DS_Store
-haraka-update.sh
+CLAUDE.md
+GEMINI.md

@@ -4,6 +4,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.3.1] - 2026-03-30
+
+#### Fixes
+
+- header: prevent prototype pollution
+  - belt: use Object.create instead of {}
+  - suspenders: add guards for **proto**, constructor, and prototype
+- header: switch from recursion to iteration in parser
+  - prevents stack exhaustion vulnerabilities
+- body: added max_mime_depth, default 100
+- body: disallow empty boundaries
+
+#### Changes
+
+- dep(message-stream): update to v2
+- test: added vulnerability test suite
+
 ### [1.3.0] - 2026-03-24
 
 - change: split index.js into `lib/` files
@@ -85,3 +102,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.2.6]: https://github.com/haraka/email-message/releases/tag/v1.2.6
 [1.2.7]: https://github.com/haraka/email-message/releases/tag/v1.2.7
 [1.3.0]: https://github.com/haraka/email-message/releases/tag/v1.3.0
+[1.3.1]: https://github.com/haraka/email-message/releases/tag/v1.3.1
