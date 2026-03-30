@@ -1,18 +1,19 @@
-const { describe, it } = require('node:test')
+const { describe, it, beforeEach } = require('node:test')
 const assert = require('node:assert')
+const { Writable } = require('node:stream')
 const AttachmentStream = require('../../lib/attachment-stream')
 const Header = require('../../lib/header')
 
-function makeStream() {
-  const header = new Header()
-  return new AttachmentStream(header)
-}
+describe('AttachmentStream', () => {
+  let stream
 
-describe('AttachmentStream', function () {
-  describe('data emission', function () {
+  beforeEach(() => {
+    stream = new AttachmentStream(new Header())
+  })
+
+  describe('data emission', () => {
     it('emits data immediately when not paused', () =>
       new Promise((resolve, reject) => {
-        const stream = makeStream()
         const chunk = Buffer.from('hello')
         stream.on('data', (data) => {
           try {
@@ -25,8 +26,7 @@ describe('AttachmentStream', function () {
         stream.emit_data(chunk)
       }))
 
-    it('buffers data while paused', function () {
-      const stream = makeStream()
+    it('buffers data while paused', () => {
       const received = []
       stream.on('data', (data) => received.push(data))
 
@@ -39,7 +39,6 @@ describe('AttachmentStream', function () {
 
     it('flushes buffer on resume', () =>
       new Promise((resolve, reject) => {
-        const stream = makeStream()
         const received = []
         stream.on('data', (data) => received.push(data.toString()))
         stream.on('end', () => {
@@ -58,19 +57,69 @@ describe('AttachmentStream', function () {
 
         stream.resume()
       }))
+
+    it('connection pause/resume', () => {
+      let paused = false
+      let resumed = false
+      stream.connection = {
+        pause: () => {
+          paused = true
+        },
+        resume: () => {
+          resumed = true
+        },
+      }
+      stream.pause()
+      assert.ok(paused)
+      stream.resume()
+      assert.ok(resumed)
+    })
+
+    it('pipe events trigger resume', () =>
+      new Promise((resolve) => {
+        const dest = new Writable({
+          write(chunk, enc, cb) {
+            cb()
+          },
+        })
+
+        stream.pipe(dest)
+        stream.pause()
+
+        // Mock resume to check if called
+        let resumed = false
+        const origResume = stream.resume
+        stream.resume = function () {
+          resumed = true
+          origResume.call(this)
+        }
+
+        dest.emit('drain')
+        assert.ok(resumed)
+
+        resumed = false
+        stream.pause()
+        dest.emit('end')
+        assert.ok(resumed)
+
+        resumed = false
+        stream.pause()
+        dest.emit('close')
+        assert.ok(resumed)
+
+        resolve()
+      }))
   })
 
-  describe('end emission', function () {
+  describe('end emission', () => {
     it('emits end immediately when not paused', () =>
       new Promise((resolve) => {
-        const stream = makeStream()
         stream.on('end', resolve)
         stream.emit_end()
       }))
 
     it('defers end when paused', () =>
       new Promise((resolve, reject) => {
-        const stream = makeStream()
         let endFired = false
         stream.on('end', () => {
           endFired = true
@@ -91,17 +140,19 @@ describe('AttachmentStream', function () {
 
     it('force_end emits even while paused', () =>
       new Promise((resolve) => {
-        const stream = makeStream()
         stream.on('end', resolve)
         stream.pause()
         stream.emit_end(true)
       }))
+
+    it('destroy', () => {
+      assert.doesNotThrow(() => stream.destroy())
+    })
   })
 
-  describe('setEncoding', function () {
+  describe('setEncoding', () => {
     it('binary encoding emits strings', () =>
       new Promise((resolve, reject) => {
-        const stream = makeStream()
         stream.setEncoding('binary')
         stream.on('data', (data) => {
           try {
@@ -114,18 +165,17 @@ describe('AttachmentStream', function () {
         stream.emit_data(Buffer.from('hello'))
       }))
 
-    it('rejects non-binary encodings', function () {
-      const stream = makeStream()
+    it('rejects non-binary encodings', () => {
       assert.throws(() => stream.setEncoding('utf8'), /binary/)
     })
   })
 
-  describe('header', function () {
-    it('exposes header publicly', function () {
+  describe('header', () => {
+    it('exposes header publicly', () => {
       const header = new Header()
       header.parse(['X-Foo: bar'])
-      const stream = new AttachmentStream(header)
-      assert.equal(stream.header.get('x-foo'), 'bar')
+      const stream2 = new AttachmentStream(header)
+      assert.equal(stream2.header.get('x-foo'), 'bar')
     })
   })
 })
