@@ -1,5 +1,7 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
+const fs = require('node:fs')
+const path = require('node:path')
 const { Body, Header } = require('../index')
 
 function parseMessage(lines) {
@@ -11,7 +13,7 @@ function parseMessage(lines) {
     if (line === '\n' || line === '\r\n' || line === '') {
       break
     }
-    headerLines.push(line.endsWith('\n') ? line : line + '\n')
+    headerLines.push(line.endsWith('\n') ? line : `${line}\n`)
   }
   header.parse(headerLines)
 
@@ -23,8 +25,8 @@ function parseMessage(lines) {
   return body
 }
 
-describe('parsing', function () {
-  it('parses a simple plain text email', function () {
+describe('parsing', () => {
+  it('parses a simple plain text email', () => {
     const lines = [
       'From: sender@example.com\n',
       'To: receiver@example.com\n',
@@ -44,7 +46,7 @@ describe('parsing', function () {
     assert.equal(body.children.length, 0)
   })
 
-  it('parses a multipart/alternative email', function () {
+  it('parses a multipart/alternative email', () => {
     const lines = [
       'From: sender@example.com\n',
       'To: receiver@example.com\n',
@@ -88,7 +90,7 @@ describe('parsing', function () {
         'Content-Disposition: attachment; filename="test.txt"\n',
         'Content-Transfer-Encoding: base64\n',
         '\n',
-        Buffer.from('Hello World').toString('base64') + '\n',
+        `${Buffer.from('Hello World').toString('base64')}\n`,
         '--boundary123--\n',
       ]
 
@@ -193,19 +195,19 @@ describe('parsing', function () {
       }
     }))
 
-  it('handles base64 transfer encoding in body', function () {
+  it('handles base64 transfer encoding in body', () => {
     const content = 'This is a base64 encoded body.'
     const lines = [
       'Content-Type: text/plain; charset=utf-8\n',
       'Content-Transfer-Encoding: base64\n',
       '\n',
-      Buffer.from(content).toString('base64') + '\n',
+      `${Buffer.from(content).toString('base64')}\n`,
     ]
     const body = parseMessage(lines)
     assert.equal(body.bodytext.trim(), content)
   })
 
-  it('handles quoted-printable transfer encoding in body', function () {
+  it('handles quoted-printable transfer encoding in body', () => {
     const content =
       'This is a quoted-printable encoded body with special chars: = ? !'
     const lines = [
@@ -218,8 +220,8 @@ describe('parsing', function () {
     assert.equal(body.bodytext.trim(), content)
   })
 
-  describe('edge cases', function () {
-    it('handles malformed headers gracefully', function () {
+  describe('edge cases', () => {
+    it('handles malformed headers gracefully', () => {
       const lines = [
         'From: sender@example.com\n',
         'MalformedHeaderNoColon\n',
@@ -232,7 +234,7 @@ describe('parsing', function () {
       assert.equal(body.bodytext.trim(), 'Body')
     })
 
-    it('handles missing multipart boundary gracefully', function () {
+    it('handles missing multipart boundary gracefully', () => {
       const lines = [
         'Content-Type: multipart/alternative; boundary=missing\n',
         '\n',
@@ -248,25 +250,22 @@ describe('parsing', function () {
       assert.equal(body.children.length, 0)
     })
 
-    it('grows body buffer for large bodies', function () {
+    it('grows body buffer for large bodies', () => {
       const largeContent = 'a'.repeat(100000) // Default buf_siz is 65536
-      const lines = ['Content-Type: text/plain\n', '\n', largeContent + '\n']
+      const lines = ['Content-Type: text/plain\n', '\n', `${largeContent}\n`]
       const body = parseMessage(lines)
       assert.equal(body.bodytext.length, 100001) // +1 for \n
       assert.equal(body.bodytext.trim(), largeContent)
     })
 
-    it('handles base64 with various line lengths and padding', function () {
+    it('handles base64 with various line lengths and padding', () => {
       const content = 'The quick brown fox jumps over the lazy dog'
       const base64 = Buffer.from(content).toString('base64')
       // Split base64 into irregular lines
-      const wrappedBase64 =
-        base64.substring(0, 10) +
-        '\n' +
-        base64.substring(10, 15) +
-        '  \n' + // with spaces
-        base64.substring(15) +
-        '\n'
+      const wrappedBase64 = `${base64.substring(0, 10)}\n${base64.substring(
+        10,
+        15,
+      )}  \n${base64.substring(15)}\n`
 
       const lines = [
         'Content-Type: text/plain\n',
@@ -286,7 +285,7 @@ describe('parsing', function () {
           'Content-Disposition: attachment; filename="pause.txt"\n',
           'Content-Transfer-Encoding: base64\n',
           '\n',
-          Buffer.from(largeContent).toString('base64') + '\n',
+          `${Buffer.from(largeContent).toString('base64')}\n`,
         ]
 
         const header = new Header()
@@ -328,11 +327,8 @@ describe('parsing', function () {
       }))
   })
 
-  describe('fixtures', function () {
-    const fs = require('node:fs')
-    const path = require('node:path')
-
-    it('parses haraka-icon-attach.eml', function () {
+  describe('fixtures', () => {
+    it('parses haraka-icon-attach.eml', () => {
       const eml = fs.readFileSync(
         path.join(__dirname, 'fixtures', 'haraka-icon-attach.eml'),
       )
@@ -349,12 +345,12 @@ describe('parsing', function () {
       let i = 0
       for (; i < lines.length; i++) {
         if (lines[i] === '\r' || lines[i] === '' || lines[i] === '\n') break
-        headerLines.push(lines[i] + '\n')
+        headerLines.push(`${lines[i]}\n`)
       }
       body.header.parse(headerLines)
 
       for (i++; i < lines.length; i++) {
-        body.parse_more(lines[i] + '\n')
+        body.parse_more(`${lines[i]}\n`)
       }
       body.parse_end()
 
@@ -362,7 +358,7 @@ describe('parsing', function () {
       assert.equal(body.children.length, 2)
     })
 
-    it('parses haraka-tarball-attach.eml', function () {
+    it('parses haraka-tarball-attach.eml', () => {
       const eml = fs.readFileSync(
         path.join(__dirname, 'fixtures', 'haraka-tarball-attach.eml'),
       )
@@ -379,12 +375,12 @@ describe('parsing', function () {
       let i = 0
       for (; i < lines.length; i++) {
         if (lines[i] === '\r' || lines[i] === '' || lines[i] === '\n') break
-        headerLines.push(lines[i] + '\n')
+        headerLines.push(`${lines[i]}\n`)
       }
       body.header.parse(headerLines)
 
       for (i++; i < lines.length; i++) {
-        body.parse_more(lines[i] + '\n')
+        body.parse_more(`${lines[i]}\n`)
       }
       body.parse_end()
 

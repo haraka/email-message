@@ -1,11 +1,11 @@
 'use strict'
 
-const { describe, it } = require('node:test')
+const { describe, test } = require('node:test')
 const assert = require('node:assert')
 const { Body, Header } = require('../index')
 
-describe('Vulnerabilities', function () {
-  it('Header prototype pollution', function () {
+describe('Vulnerabilities', () => {
+  test('Header prototype pollution', () => {
     const Header = require('../lib/header')
     const h = new Header()
     // Try adding dangerous headers
@@ -44,7 +44,7 @@ describe('Vulnerabilities', function () {
     )
   })
 
-  it('RFC 2231 Recursion (Stack Overflow)', function () {
+  test('RFC 2231 Recursion (Stack Overflow)', () => {
     const header = new Header()
     const lines = [
       'Content-Disposition: attachment; ' +
@@ -59,7 +59,7 @@ describe('Vulnerabilities', function () {
     })
   })
 
-  it('Empty Boundary Vulnerability', function () {
+  test('Empty Boundary Vulnerability', () => {
     const body = new Body()
     // Simulate a multipart header with a space as boundary
     body.header.parse(['Content-Type: multipart/mixed; boundary=" "\n'])
@@ -72,7 +72,7 @@ describe('Vulnerabilities', function () {
     )
   })
 
-  it('MIME Nesting Recursion', function () {
+  test('MIME Nesting Recursion', () => {
     const nested_depth = 200 // Exceeds default max_mime_depth of 100
     const body = new Body()
     body.header.parse(['Content-Type: multipart/mixed; boundary=0\n'])

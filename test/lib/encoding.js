@@ -3,8 +3,8 @@ const assert = require('node:assert')
 const encoding = require('../../lib/encoding')
 const Body = require('../../lib/body')
 
-describe('encoding', function () {
-  it('try_convert fallback when iconv-lite fails', function () {
+describe('encoding', () => {
+  it('try_convert fallback when iconv-lite fails', () => {
     const data = Buffer.from('hello')
     // Force failure by passing an invalid encoding
 
@@ -12,11 +12,11 @@ describe('encoding', function () {
     assert.equal(result, 'hello')
   })
 
-  it('Iconv is exported (might be undefined)', function () {
+  it('Iconv is exported (might be undefined)', () => {
     assert.ok('Iconv' in encoding)
   })
 
-  it('uses iconv-lite for common encoding (ISO-8859-1)', function () {
+  it('uses iconv-lite for common encoding (ISO-8859-1)', () => {
     const body = new Body()
     body.state = 'headers'
     ;[
@@ -34,7 +34,7 @@ describe('encoding', function () {
     )
   })
 
-  it('uses iconv-lite for UTF-8', function () {
+  it('uses iconv-lite for UTF-8', () => {
     const body = new Body()
     body.state = 'headers'
     ;[
@@ -63,7 +63,7 @@ describe('encoding', function () {
     assert.ok(converter, 'Should be able to create iconv converter')
   })
 
-  it('attempts iconv fallback for unsupported encoding', function () {
+  it('attempts iconv fallback for unsupported encoding', () => {
     const body = new Body()
     body.state = 'headers'
     ;[
@@ -78,7 +78,7 @@ describe('encoding', function () {
     assert.ok(body.bodytext.includes('Test'))
   })
 
-  it('falls back to toString for completely unsupported encoding', function () {
+  it('falls back to toString for completely unsupported encoding', () => {
     const body = new Body()
     body.state = 'headers'
     ;[
@@ -93,7 +93,7 @@ describe('encoding', function () {
     assert.equal(body.body_encoding, 'broken//FAKE-ENCODING')
   })
 
-  it('handles toString fallback gracefully', function () {
+  it('handles toString fallback gracefully', () => {
     const body = new Body()
     body.state = 'headers'
     ;[

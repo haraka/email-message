@@ -2,13 +2,11 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert')
 const Body = require('../../lib/body')
 
-function _fill_body(body, quote) {
+const _fill_body = (body, quote = '') => {
   // Body.bodytext retains the original received text before filters are
   // applied so the filtered text isn't tested against URIBLs, etc. Since we
   // want to test filter output, we pull out the parsed body parts that are
   // passed to the transaction.
-
-  quote = quote || ''
 
   body.state = 'headers'
   body.parse_more(
@@ -56,7 +54,7 @@ function _fill_body(body, quote) {
   return [text, html]
 }
 
-function _fill_empty_body(body) {
+const _fill_empty_body = (body) => {
   body.state = 'headers'
   body.parse_more('Content-Type: multipart/alternative; boundary=abcdef\n')
   body.parse_more('\n')
@@ -81,16 +79,16 @@ function _fill_empty_body(body) {
   return [text, html]
 }
 
-describe('body', function () {
-  describe('basic', function () {
-    it('children', function () {
+describe('body', () => {
+  describe('basic', () => {
+    it('children', () => {
       const body = new Body()
       _fill_body(body)
 
       assert.equal(body.children.length, 2)
     })
 
-    it('correct mime parsing (#2548)', function () {
+    it('correct mime parsing (#2548)', () => {
       const tests = [
         [
           'utf-8',
@@ -169,37 +167,37 @@ describe('body', function () {
       }
     })
 
-   it('parse_start with invalid CTE', function () {
-       const body = new Body()
-       body.header.add('Content-Transfer-Encoding', 'invalid-cte')
-       body.parse_more('\n') // Transition to body
-       assert.equal(body.state, 'body')
-   })
+    it('parse_start with invalid CTE', () => {
+      const body = new Body()
+      body.header.add('Content-Transfer-Encoding', 'invalid-cte')
+      body.parse_more('\n') // Transition to body
+      assert.equal(body.state, 'body')
+    })
 
-   it('parse_attachment large data', function () {
-       const body = new Body()
-       body.header.add('Content-Type', 'application/octet-stream')
-       body.parse_more('\n')
+    it('parse_attachment large data', () => {
+      const body = new Body()
+      body.header.add('Content-Type', 'application/octet-stream')
+      body.parse_more('\n')
 
-       // buf_siz is 65536
-       const large = Buffer.alloc(70000, 'a')
-       body.on('attachment_start', (ct, fn, part, stream) => {
-           stream.on('data', (chunk) => {
-               assert.equal(chunk.length, 70000)
-           })
-       })
-       body.parse_more(large)
-   })
+      // buf_siz is 65536
+      const large = Buffer.alloc(70000, 'a')
+      body.on('attachment_start', (ct, fn, part, stream) => {
+        stream.on('data', (chunk) => {
+          assert.equal(chunk.length, 70000)
+        })
+      })
+      body.parse_more(large)
+    })
 
-   it('decode_base64 with small chunks', function () {
-       const body = new Body()
-       const data = body.decode_base64(Buffer.from('YQ==')) // 'a'
-       assert.equal(data.toString(), 'a')
-   })
+    it('decode_base64 with small chunks', () => {
+      const body = new Body()
+      const data = body.decode_base64(Buffer.from('YQ==')) // 'a'
+      assert.equal(data.toString(), 'a')
+    })
   })
 
-  describe('banners', function () {
-    it('banner', function () {
+  describe('banners', () => {
+    it('banner', () => {
       const body = new Body()
       body.set_banner(['A text banner', 'An HTML banner'])
       const parts = _fill_body(body)
@@ -208,7 +206,7 @@ describe('body', function () {
       assert.ok(/<P>An HTML banner<\/P>$/.test(parts[1]))
     })
 
-    it('insert_banner', function () {
+    it('insert_banner', () => {
       let content_type
       let buf
       let new_buf
@@ -239,7 +237,7 @@ describe('body', function () {
       )
     })
 
-    it('insert_banner: html insertion', function () {
+    it('insert_banner: html insertion', () => {
       const body = new Body()
       body.header.add('Content-Type', 'text/html')
       body.set_banner(['TEXT', 'HTML'])
@@ -250,7 +248,7 @@ describe('body', function () {
       assert.ok(body.bodytext.includes('<P>HTML</P>'))
     })
 
-    it('_get_html_insert_position', function () {
+    it('_get_html_insert_position', () => {
       const body = new Body()
       // private helper used by insert_banner
       body.header.add('Content-Type', 'text/html')
@@ -268,7 +266,7 @@ describe('body', function () {
       assert.ok(body2.bodytext.includes('<P>HTML</P>'))
     })
 
-    it('insert_banner: invalid encoding', function () {
+    it('insert_banner: invalid encoding', () => {
       const body = new Body()
       body.header.add('Content-Type', 'text/plain')
       body.set_banner(['BANNER', 'BANNER'])
@@ -281,7 +279,7 @@ describe('body', function () {
       body.parse_end()
     })
 
-    it('insert_banner: empty buffer', function () {
+    it('insert_banner: empty buffer', () => {
       let content_type
       let new_buf
       const enc = 'UTF-8'
@@ -310,7 +308,7 @@ describe('body', function () {
       )
     })
 
-    it('insert_banner: empty body', function () {
+    it('insert_banner: empty body', () => {
       const body = new Body()
       const banners = ['textbanner', 'htmlbanner']
 
@@ -322,8 +320,8 @@ describe('body', function () {
     })
   })
 
-  describe('filters', function () {
-    it('empty', function () {
+  describe('filters', () => {
+    it('empty', () => {
       const body = new Body()
       body.add_filter(() => {})
       const parts = _fill_body(body)
@@ -332,7 +330,7 @@ describe('body', function () {
       assert.ok(/This is some HTML/.test(parts[1]))
     })
 
-    it('empty filter', function () {
+    it('empty filter', () => {
       const body = new Body()
       body.header.add('Content-Type', 'text/plain')
       body.add_filter((ct, enc, buf) => {
@@ -343,7 +341,7 @@ describe('body', function () {
       assert.ok(result.toString().includes('filtered'))
     })
 
-    it('search/replace', function () {
+    it('search/replace', () => {
       const body = new Body()
       body.add_filter((ct, enc, buf) => {
         if (/^text\/plain/.test(ct)) {
@@ -358,7 +356,7 @@ describe('body', function () {
       assert.equal(parts[1], '<p>HTML FILTERED</p>')
     })
 
-    it('regression: duplicate multi-part preamble when filters added', function () {
+    it('regression: duplicate multi-part preamble when filters added', () => {
       const body = new Body()
       body.add_filter(() => {})
 
@@ -394,8 +392,8 @@ describe('body', function () {
     })
   })
 
-  describe('rfc2231', function () {
-    it('multi-value', function () {
+  describe('rfc2231', () => {
+    it('multi-value', () => {
       const body = new Body()
       _fill_body(body)
 
@@ -415,7 +413,7 @@ describe('body', function () {
       )
     })
 
-    it('enc-and-lang', function () {
+    it('enc-and-lang', () => {
       const body = new Body()
       _fill_body(body)
 
@@ -426,7 +424,7 @@ describe('body', function () {
       )
     })
 
-    it('multi-value-enc-and-lang', function () {
+    it('multi-value-enc-and-lang', () => {
       const body = new Body()
       _fill_body(body)
 
@@ -438,22 +436,22 @@ describe('body', function () {
     })
   })
 
-  describe('boundaries', function () {
-    it('with-quotes', function () {
+  describe('boundaries', () => {
+    it('with-quotes', () => {
       const body = new Body()
       _fill_body(body, '"')
 
       assert.equal(body.children.length, 2)
     })
 
-    it('without-quotes', function () {
+    it('without-quotes', () => {
       const body = new Body()
       _fill_body(body, '')
 
       assert.equal(body.children.length, 2)
     })
 
-    it('with-bad-quotes', function () {
+    it('with-bad-quotes', () => {
       const body = new Body()
       _fill_body(body, "'")
 
@@ -461,8 +459,8 @@ describe('body', function () {
     })
   })
 
-  describe('attachments', function () {
-    describe('content-type-name', function () {
+  describe('attachments', () => {
+    describe('content-type-name', () => {
       it('with-quotes', () =>
         new Promise((resolve, reject) => {
           const body = new Body()

@@ -24,15 +24,15 @@ const rawLines = [
   'X-Mailer: iPhone Mail (13E233)',
 ]
 
-function makeHeader() {
+const makeHeader = () => {
   const h = new Header()
   h.parse(rawLines)
   return h
 }
 
-describe('header', function () {
-  describe('add_headers', function () {
-    it('add_basic', function () {
+describe('header', () => {
+  describe('add_headers', () => {
+    it('add_basic', () => {
       const h = makeHeader()
       h.add('Foo', 'bar')
       assert.equal(h.lines()[0], 'Foo: bar\n')
@@ -40,7 +40,7 @@ describe('header', function () {
       assert.equal(h.lines()[14], 'Fizz: buzz\n')
     })
 
-    it('add_utf8', function () {
+    it('add_utf8', () => {
       const h = makeHeader()
       h.add('Foo', 'bøø')
       assert.equal(h.lines()[0], 'Foo: =?UTF-8?Q?b=C3=B8=C3=B8?=\n')
@@ -60,7 +60,7 @@ describe('header', function () {
       )
     })
 
-    it('add/add_end with missing key', function () {
+    it('add/add_end with missing key', () => {
       const h = new Header()
       h.add('', 'value1')
       assert.equal(h.get('X-Haraka-Blank'), 'value1')
@@ -69,14 +69,14 @@ describe('header', function () {
     })
   })
 
-  describe('continuations', function () {
-    it('continuations_decoded', function () {
+  describe('continuations', () => {
+    it('continuations_decoded', () => {
       const h = makeHeader()
       assert.ok(!/\n/.test(h.get_decoded('content-type')))
     })
   })
 
-  describe('decode', function () {
+  describe('decode', () => {
     const cases = [
       {
         name: 'multiline 8bit header (#2675)',
@@ -126,7 +126,7 @@ describe('header', function () {
     ]
 
     for (const c of cases) {
-      it(c.name, function () {
+      it(c.name, () => {
         const h = new Header()
         h.parse(c.input)
         assert.ok(
@@ -137,8 +137,8 @@ describe('header', function () {
     }
   })
 
-  describe('get', function () {
-    it('get_all for nonexistent key', function () {
+  describe('get', () => {
+    it('get_all for nonexistent key', () => {
       const h = new Header()
       const all = h.get_all('nonexistent')
       assert.deepEqual(all, [])
@@ -146,8 +146,8 @@ describe('header', function () {
     })
   })
 
-  describe('parse', function () {
-    it('get_decoded', function () {
+  describe('parse', () => {
+    it('get_decoded', () => {
       const h = makeHeader()
       assert.equal(h.lines().length, 13)
       assert.equal(
@@ -157,7 +157,7 @@ describe('header', function () {
       assert.equal(h.get_decoded('fromUTF8'), 'Kohl\u2019s <Kohls@s.kohls.com>')
     })
 
-    it('content type w/parens', function () {
+    it('content type w/parens', () => {
       const h = makeHeader()
       assert.equal(h.lines().length, 13)
       assert.equal(
@@ -166,20 +166,20 @@ describe('header', function () {
       )
     })
 
-    it('parse malformed line', function () {
+    it('parse malformed line', () => {
       const h = new Header()
       h.parse(['This is not a header line'])
       assert.deepEqual(h.header_list, ['This is not a header line'])
     })
 
-    it('RFC2231 decodeURIComponent failure', function () {
+    it('RFC2231 decodeURIComponent failure', () => {
       const h = new Header()
       h.parse(['Content-Disposition: attachment; filename*=%E8%AC%9B%E6%BC%94'])
       const decoded = h.get_decoded('content-disposition')
       assert.ok(decoded.includes('%E8%AC%9B%E6%BC%94'))
     })
 
-    it('non-ASCII header without encoding', function () {
+    it('non-ASCII header without encoding', () => {
       const h = new Header()
       h.parse([
         'Content-Type: text/plain; charset=iso-8859-1\n',
@@ -190,8 +190,8 @@ describe('header', function () {
     })
   })
 
-  describe('remove', function () {
-    it('removes only specified header', function () {
+  describe('remove', () => {
+    it('removes only specified header', () => {
       const h = makeHeader()
       h.add('X-Test', 'remove-me')
       h.add('X-Test-1', 'do-not-remove-me')
@@ -203,7 +203,7 @@ describe('header', function () {
       )
     })
 
-    it('removes multiple matching headers', function () {
+    it('removes multiple matching headers', () => {
       const h = makeHeader()
       h.add('X-Test', 'remove me')
       h.add('X-Test', 'and remove me')
@@ -214,7 +214,7 @@ describe('header', function () {
       assert.ok(h.header_list.find((name) => name === 'X-Test-No: leave me\n'))
     })
 
-    it('remove nonexistent key', function () {
+    it('remove nonexistent key', () => {
       const h = new Header()
       h.add('Exists', 'yes')
       h.remove('Nonexistent')

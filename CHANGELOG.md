@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - dep(message-stream): update to v2
 - test: added vulnerability test suite
 - test: added additional test coverage
+- test: ES2024, table driven
 
 ### [1.3.0] - 2026-03-24
 
