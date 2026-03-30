@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - dep(message-stream): update to v2
 - test: added vulnerability test suite
+- test: added additional test coverage
 
 ### [1.3.0] - 2026-03-24
 
