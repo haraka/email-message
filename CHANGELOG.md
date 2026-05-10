@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### [1.3.3] - 2026-05-10
 
+- dep(message-stream): update to 2.0.4
 
 ### [1.3.2] - 2026-03-30
 
