@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.3.4] - 2026-05-13
+
+- fix(attachment-stream): cap paused buffer (default 64MB) at `mailparser.attachment_max_buffered` and abort with `error` when exceeded
+- fix(body): require exact MIME boundary delimiter per RFC 2046 §5.1.1
+- fix(body): pass `contentDisposition` to filters on non-empty bodies
+- fix(body): propagate `#depth + 1` to sibling parts in `parse_child`
+- feat(body): `options.maxMimeDepth` overrides the config-derived cap
+- deps(all): bumped to latest
+
 ### [1.3.3] - 2026-05-10
 
 - dep(message-stream): update to 2.0.4
@@ -115,3 +124,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.3.1]: https://github.com/haraka/email-message/releases/tag/v1.3.1
 [1.3.2]: https://github.com/haraka/email-message/releases/tag/v1.3.2
 [1.3.3]: https://github.com/haraka/email-message/releases/tag/v1.3.3
+[1.3.4]: https://github.com/haraka/email-message/releases/tag/v1.3.4

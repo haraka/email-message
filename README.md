@@ -135,7 +135,13 @@ const body = new Body(header, options)
 ```
 
 `header` is a `Header` instance (or omit for a headerless body that defaults
-to `text/plain`). `options` is currently reserved for future use.
+to `text/plain`).
+
+`options` (optional):
+
+| Key            | Type     | Default                                    | Effect                                                                                                  |
+| -------------- | -------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `maxMimeDepth` | `number` | `mailparser.max_mime_depth` config, or 100 | Cap on nested MIME depth. Parts at or beyond the cap stop descending and emit a `Max MIME depth` error. |
 
 ### `body.parse_more(line)` → `Buffer | ''`
 
@@ -257,7 +263,10 @@ body.on('attachment_start', (ct, filename, part, stream) => {
 ### `stream.pause()` / `stream.resume()`
 
 Pauses and resumes data emission. Buffered chunks are held in memory until
-resumed.
+resumed, up to `mailparser.attachment_max_buffered` bytes (default 64 MiB).
+Exceeding the cap aborts the stream — it emits a single `error`, drops the
+buffer, and ignores any further `emit_data` / `resume`. Tune per stream by
+passing `{ maxPauseBuffered: bytes }` to the constructor.
 
 ### `stream.setEncoding('binary')`
 

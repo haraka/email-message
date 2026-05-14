@@ -356,6 +356,25 @@ describe('body', () => {
       assert.equal(parts[1], '<p>HTML FILTERED</p>')
     })
 
+    it('passes contentDisposition as 4th arg to filters on non-empty bodies', () => {
+      const seen = []
+      const body = new Body()
+      body.header.add('Content-Type', 'text/plain')
+      // `inline` keeps the part in the body path (not attachment), so the
+      // non-empty filter loop in parse_end runs.
+      body.header.add('Content-Disposition', 'inline')
+      body.add_filter((ct, enc, buf, cd) => {
+        seen.push({ ct, cd })
+        return buf
+      })
+      body.parse_more('hello world\n')
+      body.parse_end()
+
+      assert.equal(seen.length, 1)
+      assert.match(seen[0].ct, /text\/plain/)
+      assert.equal(seen[0].cd, 'inline')
+    })
+
     it('regression: duplicate multi-part preamble when filters added', () => {
       const body = new Body()
       body.add_filter(() => {})
@@ -456,6 +475,56 @@ describe('body', () => {
       _fill_body(body, "'")
 
       assert.equal(body.children.length, 0)
+    })
+
+    it('propagates depth to sibling Bodies (S2: max_mime_depth not reset per sibling)', () => {
+      // With maxMimeDepth=1, the first sibling inside `outer` is at depth 1
+      // and so its own nested multipart should hit the cap. With the
+      // depth-reset bug, the *second* sibling came back at depth 0 and
+      // could re-nest one level deeper, defeating the guard.
+      const body = new Body(undefined, { maxMimeDepth: 1 })
+      body.state = 'headers'
+      body.parse_more('Content-Type: multipart/mixed; boundary=outer\n')
+      body.parse_more('\n')
+      for (const tag of ['', 'b']) {
+        body.parse_more('--outer\n')
+        body.parse_more(`Content-Type: multipart/mixed; boundary=L1${tag}\n`)
+        body.parse_more('\n')
+        body.parse_more(`--L1${tag}\n`)
+        body.parse_more('Content-Type: text/plain\n')
+        body.parse_more('\n')
+        body.parse_more('leaf\n')
+        body.parse_more(`--L1${tag}--\n`)
+      }
+      body.parse_more('--outer--\n')
+      body.parse_end()
+
+      assert.equal(body.children.length, 2, 'two siblings inside outer')
+      assert.equal(body.children[0].children.length, 0, 'first sibling capped')
+      assert.equal(
+        body.children[1].children.length,
+        0,
+        'second sibling also capped',
+      )
+    })
+
+    it('does not split on a boundary-lookalike prefix line', () => {
+      const body = new Body()
+      body.state = 'headers'
+      body.parse_more('Content-Type: multipart/alternative; boundary=abc\n')
+      body.parse_more('\n')
+      body.parse_more('--abc\n')
+      body.parse_more('Content-Type: text/plain\n')
+      body.parse_more('\n')
+      body.parse_more('first line\n')
+      body.parse_more('--abcXYZ\n') // boundary lookalike — must NOT split
+      body.parse_more('second line\n')
+      body.parse_more('--abc--\n')
+      body.parse_end()
+
+      assert.equal(body.children.length, 1)
+      assert.match(body.children[0].bodytext, /first line/)
+      assert.match(body.children[0].bodytext, /second line/)
     })
   })
 

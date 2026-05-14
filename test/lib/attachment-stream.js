@@ -75,6 +75,34 @@ describe('AttachmentStream', () => {
       assert.ok(resumed)
     })
 
+    it('emits error and stops buffering when paused buffer exceeds the cap', () =>
+      new Promise((resolve, reject) => {
+        const s = new AttachmentStream(new Header(), { maxPauseBuffered: 10 })
+        const errors = []
+        const received = []
+        s.on('error', (e) => errors.push(e))
+        s.on('data', (d) => received.push(d))
+
+        s.pause()
+        s.emit_data(Buffer.alloc(8)) // ok
+        s.emit_data(Buffer.alloc(8)) // 8 + 8 > 10 — abort
+
+        // After abort, further emits and resume should be no-ops
+        s.emit_data(Buffer.alloc(8))
+        s.resume()
+
+        setImmediate(() => {
+          try {
+            assert.equal(errors.length, 1)
+            assert.match(errors[0].message, /exceed/i)
+            assert.equal(received.length, 0)
+            resolve()
+          } catch (e) {
+            reject(e)
+          }
+        })
+      }))
+
     it('pipe events trigger resume', () =>
       new Promise((resolve) => {
         const dest = new Writable({
