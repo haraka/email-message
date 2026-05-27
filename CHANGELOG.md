@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - fix(body): pass `contentDisposition` to filters on non-empty bodies
 - fix(body): propagate `#depth + 1` to sibling parts in `parse_child`
 - feat(body): `options.maxMimeDepth` overrides the config-derived cap
+- perf(header): short-circuit `_parse_rfc2231` when the input contains no `*` or `=`; fixes O(n²) backtracking on long unstructured headers (15KB `From:` 117ms → 0.02ms)
 - deps(all): bumped to latest
 
 ### [1.3.3] - 2026-05-10

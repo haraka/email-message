@@ -92,27 +92,21 @@ describe('Vulnerabilities', () => {
     assert.ok(body.children.length < 200)
   })
 
-  test(
-    'Long unstructured From headers parse promptly',
-    {
-      skip: 'Known slow path from fuzzing run; enable with the corresponding fix',
-    },
-    () => {
-      const lines = ['Subject: hi\n', `From: ${'A'.repeat(15000)}\n`]
-      let totalMs = 0
+  test('Long unstructured From headers parse promptly', () => {
+    const lines = ['Subject: hi\n', `From: ${'A'.repeat(15000)}\n`]
+    let totalMs = 0
 
-      for (let i = 0; i < 5; i++) {
-        const header = new Header()
-        const started = process.hrtime.bigint()
-        header.parse(lines)
-        totalMs += Number(process.hrtime.bigint() - started) / 1e6
-      }
+    for (let i = 0; i < 5; i++) {
+      const header = new Header()
+      const started = process.hrtime.bigint()
+      header.parse(lines)
+      totalMs += Number(process.hrtime.bigint() - started) / 1e6
+    }
 
-      const averageMs = totalMs / 5
-      assert.ok(
-        averageMs < 100,
-        `average parse time was ${averageMs.toFixed(1)}ms for a 15KB From header`,
-      )
-    },
-  )
+    const averageMs = totalMs / 5
+    assert.ok(
+      averageMs < 100,
+      `average parse time was ${averageMs.toFixed(1)}ms for a 15KB From header`,
+    )
+  })
 })
