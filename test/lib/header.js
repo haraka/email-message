@@ -146,6 +146,40 @@ describe('header', () => {
     })
   })
 
+  describe('get_addresses', () => {
+    it('returns parsed addresses for a From header', () => {
+      const h = makeHeader()
+      const r = h.get_addresses('from')
+      assert.equal(r.length, 1)
+      assert.equal(r[0].address, 'helpme@gmail.com')
+      assert.equal(r[0].phrase, 'Matt Sergeant')
+    })
+
+    it('decodes RFC 2047 phrases', () => {
+      const h = makeHeader()
+      const r = h.get_addresses('FromUTF8')
+      assert.equal(r.length, 1)
+      assert.equal(r[0].address, 'Kohls@s.kohls.com')
+      assert.equal(r[0].phrase, 'Kohl’s')
+    })
+
+    it('returns an empty array for a missing header', () => {
+      const h = makeHeader()
+      assert.deepEqual(h.get_addresses('nonexistent'), [])
+    })
+
+    it('handles multiple addresses in a single header', () => {
+      const h = new Header()
+      h.parse(['To: a@x.test, "Bob" <b@y.test>, group: c@z.test, d@z.test;'])
+      const r = h.get_addresses('to')
+      assert.equal(r.length, 3)
+      assert.equal(r[0].address, 'a@x.test')
+      assert.equal(r[1].address, 'b@y.test')
+      // r[2] is a Group with two members
+      assert.equal(r[2].addresses.length, 2)
+    })
+  })
+
   describe('parse', () => {
     it('get_decoded', () => {
       const h = makeHeader()

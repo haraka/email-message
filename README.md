@@ -85,6 +85,33 @@ continuations resolved. Use this for display or further parsing.
 header.get_decoded('subject') // 'Hello World'
 ```
 
+### `header.get_addresses(key)` → `(Address | Group)[]`
+
+Parses an address-valued header (`From`, `To`, `Cc`, `Bcc`, `Reply-To`,
+`Sender`, …) into structured `Address` / `Group` instances via
+[`@haraka/email-address`][hea]. The header value goes through `get_decoded()`
+first, so RFC 2047 phrases are decoded before parsing.
+
+```js
+const [from] = header.get_addresses('from')
+from.address // 'alice@example.com'
+from.phrase // 'Alice'
+
+const recipients = header.get_addresses('to')
+for (const r of recipients) {
+  if (r instanceof Group) {
+    /* r.phrase, r.addresses */
+  } else {
+    /* r is an Address */
+  }
+}
+```
+
+Returns `[]` when the header is absent; **throws** on malformed input — wrap
+in `try/catch` when the source is untrusted.
+
+[hea]: https://github.com/haraka/email-address
+
 ### `header.add(key, value)`
 
 Prepends a header. Non-ASCII values are automatically Q-encoded.

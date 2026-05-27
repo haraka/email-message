@@ -4,14 +4,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.0] - 2026-05-26
+
+- feat(header): `header.get_addresses(key)` — returns parsed `(Address | Group)[]`
+
 ### [1.3.4] - 2026-05-13
 
-- fix(attachment-stream): cap paused buffer (default 64MB) at `mailparser.attachment_max_buffered` and abort with `error` when exceeded
+- fix(attachment-stream): cap paused buffer (default 64MB), abort when exceeded
 - fix(body): require exact MIME boundary delimiter per RFC 2046 §5.1.1
 - fix(body): pass `contentDisposition` to filters on non-empty bodies
 - fix(body): propagate `#depth + 1` to sibling parts in `parse_child`
 - feat(body): `options.maxMimeDepth` overrides the config-derived cap
 - perf(header): short-circuit `_parse_rfc2231` when the input contains no `*` or `=`; fixes O(n²) backtracking on long unstructured headers (15KB `From:` 117ms → 0.02ms)
+- dep: add `@haraka/email-address` ^3.1.5
 - deps(all): bumped to latest
 
 ### [1.3.3] - 2026-05-10
@@ -126,3 +131,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.3.2]: https://github.com/haraka/email-message/releases/tag/v1.3.2
 [1.3.3]: https://github.com/haraka/email-message/releases/tag/v1.3.3
 [1.3.4]: https://github.com/haraka/email-message/releases/tag/v1.3.4
+[1.4.0]: https://github.com/haraka/email-message/releases/tag/v1.4.0
