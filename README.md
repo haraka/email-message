@@ -1,6 +1,4 @@
-[![CI Test Status][ci-img]][ci-url]
-[![Code Climate][clim-img]][clim-url]
-[![Test Coverage][cov-img]][cov-url]
+[![CI Status][ci-img]][ci-url] [![Code Qlty][qlty-img]][qlty-url] [![Coverage][cov-img]][cov-url]
 
 # haraka-email-message
 
@@ -361,7 +359,7 @@ startup. Unrecognised encodings fall back to `Buffer.toString()` and
 
 [ci-img]: https://github.com/haraka/email-message/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/haraka/email-message/actions/workflows/ci.yml
-[clim-img]: https://qlty.sh/gh/haraka/projects/email-message/maintainability.svg
-[clim-url]: https://qlty.sh/gh/haraka/projects/email-message
+[qlty-img]: https://qlty.sh/gh/haraka/projects/email-message/maintainability.svg
+[qlty-url]: https://qlty.sh/gh/haraka/projects/email-message
 [cov-img]: https://coveralls.io/repos/github/haraka/email-message/badge.svg
 [cov-url]: https://coveralls.io/github/haraka/email-message
