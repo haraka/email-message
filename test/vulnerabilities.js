@@ -92,6 +92,58 @@ describe('Vulnerabilities', () => {
     assert.ok(body.children.length < 200)
   })
 
+  test('RFC 2231 quadratic ReDoS (GHSA-6f4j-gpc2-6p2g)', () => {
+    // A header value that clears the `*`/`=` presence guard yet is built to
+    // maximise backtracking in the old regex parser: a long run of attribute
+    // characters ending in a lone `*`. The linear tokenizer must parse it in
+    // time proportional to size, not size².
+    const timeParse = (runLength) => {
+      const value = `x*=y; ${'a'.repeat(runLength)}*`
+      const lines = [`Content-Disposition: attachment; ${value}\n`]
+      const started = process.hrtime.bigint()
+      new Header().parse(lines)
+      return Number(process.hrtime.bigint() - started) / 1e6
+    }
+
+    timeParse(50_000) // warm up
+    const small = timeParse(100_000)
+    const large = timeParse(800_000)
+
+    // 8× the input under O(n²) is ~64× the work; a linear scan stays far below.
+    assert.ok(
+      large < Math.max(small * 20, 100),
+      `non-linear RFC 2231 parse: 100KB=${small.toFixed(1)}ms 800KB=${large.toFixed(1)}ms`,
+    )
+  })
+
+  test('RFC 2047 encoded-word quadratic ReDoS', () => {
+    // Two decode_header regexes used to backtrack quadratically: the
+    // whitespace-collapse between adjacent encoded-words, and the encoded-word
+    // decoder itself (a `?B?` prefix with no closing `?=` starved the lazy
+    // scan). Both must now be linear in the value length.
+    const timeDecode = (build) => (n) => {
+      const lines = [`Subject: ${build(n)}\n`]
+      const started = process.hrtime.bigint()
+      new Header().parse(lines)
+      return Number(process.hrtime.bigint() - started) / 1e6
+    }
+
+    const vectors = {
+      'collapse (=?=?…)': timeDecode((n) => '=?'.repeat(n)),
+      'decoder (=?a?B?xxxx…)': timeDecode((n) => '=?a?B?xxxx'.repeat(n)),
+    }
+
+    for (const [name, time] of Object.entries(vectors)) {
+      time(20_000) // warm up
+      const small = time(50_000)
+      const large = time(400_000)
+      assert.ok(
+        large < Math.max(small * 20, 100),
+        `non-linear ${name}: 1x=${small.toFixed(1)}ms 8x=${large.toFixed(1)}ms`,
+      )
+    }
+  })
+
   test('Long unstructured From headers parse promptly', () => {
     const lines = ['Subject: hi\n', `From: ${'A'.repeat(15000)}\n`]
     let totalMs = 0

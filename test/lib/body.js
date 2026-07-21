@@ -343,7 +343,7 @@ describe('body', () => {
 
     it('search/replace', () => {
       const body = new Body()
-      body.add_filter((ct, enc, buf) => {
+      body.add_filter((ct) => {
         if (/^text\/plain/.test(ct)) {
           return Buffer.from('TEXT FILTERED')
         } else if (/text\/html/.test(ct)) {
