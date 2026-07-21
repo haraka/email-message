@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.1] - 2026-07-20
+
+- fix(header): replace RFC 2231 regex with tokenizer `lib/rfc2231`
+  - 20-40% faster typical case, 8,000% faster adversarial case
+- fix(header): replace RFC 2047 regex with tokenizer `lib/rfc2047`
+  - 2x-3x faster typical case, 1,500% faster adversarial case
+- packaging / meta updates (#26)
+
 ### [1.4.0] - 2026-05-26
 
 - feat(header): `header.get_addresses(key)` — returns parsed `(Address | Group)[]`
@@ -132,3 +140,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.3.3]: https://github.com/haraka/email-message/releases/tag/v1.3.3
 [1.3.4]: https://github.com/haraka/email-message/releases/tag/v1.3.4
 [1.4.0]: https://github.com/haraka/email-message/releases/tag/v1.4.0
+[1.4.1]: https://github.com/haraka/email-message/releases/tag/v1.4.1

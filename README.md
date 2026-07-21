@@ -2,7 +2,7 @@
 
 # haraka-email-message
 
-RFC 2822 header parser and MIME body parser used throughout [Haraka](https://haraka.github.io). Can be used standalone.
+RFC 2822 header parser and MIME body parser used in [Haraka](https://haraka.github.io). Can be used standalone.
 
 ## Installation
 
