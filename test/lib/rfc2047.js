@@ -1,54 +1,46 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
-const { tokenize } = require('../../lib/rfc2047')
+const { decode } = require('../../lib/rfc2047')
 
-const all = (str) => [...tokenize(str)]
-// Render segments compactly: encoded-words as <charset|encoding|text>.
-const render = (str) =>
-  all(str)
-    .map((s) =>
-      s.encoded ? `<${s.charset}|${s.encoding}|${s.text}>` : s.value,
-    )
-    .join('')
+// Render each encoded-word as <charset|encoding|text> so the extracted fields
+// and the passthrough/whitespace handling are both visible in the output.
+const mark = (charset, encoding, text) => `<${charset}|${encoding}|${text}>`
+const render = (str) => decode(str, mark)
 
 describe('rfc2047', () => {
   describe('grammar', () => {
-    it('parses a single encoded-word', () => {
-      assert.deepEqual(all('=?UTF-8?Q?foo?='), [
-        { encoded: true, charset: 'UTF-8', encoding: 'Q', text: 'foo' },
-      ])
+    it('decodes a single encoded-word', () => {
+      assert.equal(render('=?UTF-8?Q?foo?='), '<UTF-8|Q|foo>')
     })
 
-    it('parses a base64 encoded-word with = padding in the text', () => {
-      assert.deepEqual(all('=?utf-8?b?aGk=?='), [
-        { encoded: true, charset: 'utf-8', encoding: 'b', text: 'aGk=' },
-      ])
+    it('keeps = padding in a base64 encoded-word text', () => {
+      assert.equal(render('=?utf-8?b?aGk=?='), '<utf-8|b|aGk=>')
     })
 
     it('accepts an RFC 2231 language tag on the charset', () => {
-      assert.deepEqual(all('=?UTF-8*en?Q?x?='), [
-        { encoded: true, charset: 'UTF-8', encoding: 'Q', text: 'x' },
-      ])
+      assert.equal(render('=?UTF-8*en?Q?x?='), '<UTF-8|Q|x>')
     })
 
-    it('keeps surrounding text as passthrough segments', () => {
-      assert.deepEqual(all('a =?UTF-8?Q?x?= b'), [
-        { encoded: false, value: 'a ' },
-        { encoded: true, charset: 'UTF-8', encoding: 'Q', text: 'x' },
-        { encoded: false, value: ' b' },
-      ])
+    it('keeps surrounding text', () => {
+      assert.equal(render('a =?UTF-8?Q?x?= b'), 'a <UTF-8|Q|x> b')
     })
 
     it('leaves an unknown encoding as literal text', () => {
-      assert.deepEqual(all('=?UTF-8?Z?foo?='), [
-        { encoded: false, value: '=?UTF-8?Z?foo?=' },
-      ])
+      assert.equal(render('=?UTF-8?Z?foo?='), '=?UTF-8?Z?foo?=')
     })
 
     it('leaves an unterminated word as literal text', () => {
-      assert.deepEqual(all('=?UTF-8?Q?foo'), [
-        { encoded: false, value: '=?UTF-8?Q?foo' },
-      ])
+      assert.equal(render('=?UTF-8?Q?foo'), '=?UTF-8?Q?foo')
+    })
+
+    it('never calls decodeWord for a malformed word', () => {
+      let calls = 0
+      const out = decode('=?UTF-8?Z?foo?= =?bad', () => {
+        calls++
+        return 'X'
+      })
+      assert.equal(calls, 0)
+      assert.equal(out, '=?UTF-8?Z?foo?= =?bad')
     })
   })
 
@@ -76,17 +68,15 @@ describe('rfc2047', () => {
     })
   })
 
-  it('yields a single passthrough segment when there are no encoded-words', () => {
-    assert.deepEqual(all('just text ?= =? here'), [
-      { encoded: false, value: 'just text ?= =? here' },
-    ])
-    assert.deepEqual(all(''), [])
+  it('returns input unchanged when there are no encoded-words', () => {
+    assert.equal(render('just text ?= =? here'), 'just text ?= =? here')
+    assert.equal(render(''), '')
   })
 
   describe('linear time', () => {
     const time = (str) => {
       const t = process.hrtime.bigint()
-      for (const seg of tokenize(str)) void seg
+      decode(str, mark)
       return Number(process.hrtime.bigint() - t) / 1e6
     }
 

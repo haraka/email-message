@@ -7,9 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### [1.4.1] - 2026-07-20
 
 - fix(header): replace RFC 2231 regex with tokenizer (`lib/rfc2231.js`)
-  - 20-40% faster typical case, 7,600% faster adversarial case
+  - 20-40% faster typical case, 8,000% faster adversarial case
 - fix(header): replace RFC 2047 regex with tokenizer (`lib/rfc2047.js`)
-  - 10-30% slower typical case, 300% faster adversarial case
+  - 2x-3x faster typical case, 1,500% faster adversarial case
 - packaging / meta updates (#26)
 
 ### [1.4.0] - 2026-05-26
