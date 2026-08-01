@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.2] - 2026-08-01
+
+- fix(header): get_addresses parses the raw header, then decodes phrases
+
 ### [1.4.1] - 2026-07-20
 
 - fix(header): replace RFC 2231 regex with tokenizer `lib/rfc2231`
@@ -141,3 +145,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.3.4]: https://github.com/haraka/email-message/releases/tag/v1.3.4
 [1.4.0]: https://github.com/haraka/email-message/releases/tag/v1.4.0
 [1.4.1]: https://github.com/haraka/email-message/releases/tag/v1.4.1
+[1.4.2]: https://github.com/haraka/email-message/releases/tag/v1.4.2
