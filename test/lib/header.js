@@ -163,6 +163,33 @@ describe('header', () => {
       assert.equal(r[0].phrase, 'Kohl’s')
     })
 
+    it('parses an encoded phrase containing commas', () => {
+      const h = new Header()
+      h.parse([
+        'From: =?utf-8?Q?PORT_Mozipremierek=2C_filmes_h=C3=ADrek=2C_=C3=A9rdekess=C3=A9g?=\n',
+        ' =?utf-8?Q?ek=2C_kritik=C3=A1k_=2831=2E_h=C3=A9t=29?= <hirlevel@example.hu>\n',
+      ])
+      const r = h.get_addresses('from')
+      assert.equal(r.length, 1)
+      assert.equal(r[0].address, 'hirlevel@example.hu')
+      assert.equal(
+        r[0].phrase,
+        'PORT Mozipremierek, filmes hírek, érdekességek, kritikák (31. hét)',
+      )
+    })
+
+    it('decodes encoded phrases inside a group', () => {
+      const h = new Header()
+      h.parse([
+        'To: =?utf-8?Q?Kohl=E2=80=99s?=: =?utf-8?Q?Bob=2C_Jr?= <b@y.test>;',
+      ])
+      const r = h.get_addresses('to')
+      assert.equal(r[0].phrase, 'Kohl’s')
+      assert.equal(r[0].addresses.length, 1)
+      assert.equal(r[0].addresses[0].address, 'b@y.test')
+      assert.equal(r[0].addresses[0].phrase, 'Bob, Jr')
+    })
+
     it('returns an empty array for a missing header', () => {
       const h = makeHeader()
       assert.deepEqual(h.get_addresses('nonexistent'), [])
