@@ -87,13 +87,17 @@ header.get_decoded('subject') // 'Hello World'
 
 Parses an address-valued header (`From`, `To`, `Cc`, `Bcc`, `Reply-To`,
 `Sender`, …) into structured `Address` / `Group` instances via
-[`@haraka/email-address`][hea]. The header value goes through `get_decoded()`
-first, so RFC 2047 phrases are decoded before parsing.
+[`@haraka/email-address`][hea]. Parsing runs on the raw header, then RFC 2047
+encoded-words in each phrase and comment are decoded — including inside a
+`Group`.
 
 ```js
 const [from] = header.get_addresses('from')
 from.address // 'alice@example.com'
 from.phrase // 'Alice'
+
+// From: =?utf-8?Q?Doe=2C_Alice?= <alice@example.com>
+from.phrase // 'Doe, Alice'
 
 const recipients = header.get_addresses('to')
 for (const r of recipients) {
