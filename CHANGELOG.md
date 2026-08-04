@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.3] - 2026-08-04
+
+- fix: strip CR/LF from decoded RFC 2047 encoded words
+
 ### [1.4.2] - 2026-08-01
 
 - fix(header): get_addresses parses the raw header, then decodes phrases
@@ -146,3 +150,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.4.0]: https://github.com/haraka/email-message/releases/tag/v1.4.0
 [1.4.1]: https://github.com/haraka/email-message/releases/tag/v1.4.1
 [1.4.2]: https://github.com/haraka/email-message/releases/tag/v1.4.2
+[1.4.3]: https://github.com/haraka/email-message/releases/tag/v1.4.3
