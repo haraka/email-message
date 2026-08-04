@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### [1.4.3] - 2026-08-04
 
 - fix: strip CR/LF from decoded RFC 2047 encoded words
+- deps(all): bump versions
 
 ### [1.4.2] - 2026-08-01
 

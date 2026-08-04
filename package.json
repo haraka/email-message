@@ -39,11 +39,11 @@
     "@haraka/eslint-config": "^3.0.0"
   },
   "dependencies": {
-    "@haraka/email-address": "^3.1.5",
-    "haraka-config": "^1.6.2",
+    "@haraka/email-address": "^3.1.6",
+    "haraka-config": "^1.6.3",
     "haraka-message-stream": "^2.0.6",
-    "iconv-lite": "^0.7.2",
-    "libmime": "^5.3.8",
+    "iconv-lite": "^0.7.3",
+    "libmime": "^5.4.1",
     "libqp": "^2.1.1"
   },
   "prettier": {
