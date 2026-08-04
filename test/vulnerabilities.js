@@ -144,6 +144,28 @@ describe('Vulnerabilities', () => {
     }
   })
 
+  test('RFC 2047 encoded words cannot smuggle CRLF into a decoded header', () => {
+    const payload = Buffer.from('evil\r\nX-Injected: yes').toString('base64')
+    const header = new Header()
+    header.parse([`Subject: =?utf-8?B?${payload}?=\n`])
+
+    const subject = header.get_decoded('Subject')
+    assert.ok(!/[\r\n]/.test(subject), `line breaks survived: ${subject}`)
+    assert.match(subject, /evil/)
+  })
+
+  test('RFC 2047 encoded words cannot smuggle CRLF into an address phrase', () => {
+    const payload = Buffer.from('evil\r\nX-Injected: yes').toString('base64')
+    const header = new Header()
+    header.parse([`From: =?utf-8?B?${payload}?= <a@example.com>\n`])
+
+    const [addr] = header.get_addresses('From')
+    assert.ok(
+      !/[\r\n]/.test(addr.phrase),
+      `line breaks survived: ${addr.phrase}`,
+    )
+  })
+
   test('Long unstructured From headers parse promptly', () => {
     const lines = ['Subject: hi\n', `From: ${'A'.repeat(15000)}\n`]
     let totalMs = 0
