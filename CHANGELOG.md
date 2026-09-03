@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.4] - 2026-09-03
+
+- fix(security): reject unsafe header names
+- deps(all): bump versions
+
 ### [1.4.3] - 2026-08-04
 
 - fix: strip CR/LF from decoded RFC 2047 encoded words
@@ -152,3 +157,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.4.1]: https://github.com/haraka/email-message/releases/tag/v1.4.1
 [1.4.2]: https://github.com/haraka/email-message/releases/tag/v1.4.2
 [1.4.3]: https://github.com/haraka/email-message/releases/tag/v1.4.3
+[1.4.4]: https://github.com/haraka/email-message/releases/tag/v1.4.4

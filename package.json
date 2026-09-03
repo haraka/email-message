@@ -1,6 +1,6 @@
 {
   "name": "haraka-email-message",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Haraka email message",
   "main": "index.js",
   "files": [
@@ -40,10 +40,10 @@
   },
   "dependencies": {
     "@haraka/email-address": "^3.1.6",
-    "haraka-config": "^1.6.3",
-    "haraka-message-stream": "^2.0.6",
+    "haraka-config": "^1.7.0",
+    "haraka-message-stream": "^2.0.7",
     "iconv-lite": "^0.7.3",
-    "libmime": "^5.4.1",
+    "libmime": "^5.4.3",
     "libqp": "^2.1.1"
   },
   "prettier": {
