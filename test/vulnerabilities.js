@@ -183,4 +183,157 @@ describe('Vulnerabilities', () => {
       `average parse time was ${averageMs.toFixed(1)}ms for a 15KB From header`,
     )
   })
+
+  const UNSAFE_NAMES = ['.', '..', '__proto__', 'constructor', 'prototype']
+
+  // A bare "." / ".." line is an SMTP end-of-DATA terminator only at column 0;
+  // a folded continuation (leading WSP) is a value, not a terminator.
+  const bareTerminator = (s) =>
+    s.split(/\r?\n/).some((l) => l === '.' || l === '..')
+
+  for (const name of UNSAFE_NAMES) {
+    test(`parse drops unsafe header name "${name}" in every framing`, () => {
+      const variants = [
+        `${name}\n`,
+        `${name} \n`,
+        `${name}\t\n`,
+        `${name}  \r\n`,
+        `${name}: v\n`,
+        `${name} : v\n`,
+        `${name}\n continuation\n`,
+        `${name.toUpperCase()}: v\n`,
+      ]
+      for (const variant of variants) {
+        const h = new Header()
+        h.parse(['From: a@b.com\n', variant, 'To: c@d.com\n'])
+        assert.deepEqual(
+          h.header_list,
+          ['From: a@b.com\n', 'To: c@d.com\n'],
+          `variant ${JSON.stringify(variant)} was not dropped`,
+        )
+        assert.equal(bareTerminator(h.toString()), false)
+        assert.equal(h.get(name), '')
+      }
+    })
+  }
+
+  test('parse decomposes bundled physical lines and drops embedded unsafe ones', () => {
+    for (const name of UNSAFE_NAMES) {
+      const h = new Header()
+      h.parse([`X: a\n${name}: x\nY: b\n`, `Z: c\n${name}\n`])
+      assert.equal(bareTerminator(h.toString()), false)
+      assert.equal(h.get(name), '')
+      assert.deepEqual(h.header_list, ['X: a\n', 'Y: b\n', 'Z: c\n'])
+    }
+  })
+
+  test('parse folds a lone CR so a CR-delimited terminator/suffix is neutralised', () => {
+    const h = new Header()
+    h.parse(['Subject: safe\r.\rBcc: victim@example.test\n'])
+    assert.equal(h.get('bcc'), '')
+    const segs = h.toString().split(/\r\n|\r|\n/)
+    assert.equal(
+      segs.some((l) => l === '.' || l === '..' || /^Bcc:/i.test(l)),
+      false,
+    )
+  })
+
+  test('mutators fold a lone CR in the value', () => {
+    for (const method of ['add', 'add_end']) {
+      const h = new Header()
+      h[method]('X-Foo', 'a\r.\rb')
+      const segs = h.toString().split(/\r\n|\r|\n/)
+      assert.equal(
+        segs.some((l) => l === '.' || l === '..'),
+        false,
+      )
+    }
+  })
+
+  test('parse does not promote a bare-CR suffix into an injected header', () => {
+    const wraps = [(l) => [l], (l) => [`A: 1\n${l}B: 2\n`]]
+    for (const wrap of wraps) {
+      const h = new Header()
+      h.parse(wrap('Subject: safe\rBcc: victim@example.test\n'))
+      assert.equal(h.get('bcc'), '')
+      assert.match(h.get('subject'), /^safe/)
+      assert.ok(h.header_list.some((e) => e.startsWith('Subject: safe')))
+      assert.ok(!h.header_list.some((e) => e.startsWith('Bcc:')))
+    }
+  })
+
+  test('bundled headers serialize with one line break, not a blank line', () => {
+    const h = new Header()
+    h.parse(['X: a\nY: b\n'])
+    assert.equal(h.toString(), 'X: a\nY: b\n')
+    assert.equal(/\n\s*\n/.test(h.toString().replace(/\n$/, '')), false)
+  })
+
+  test('parse preserves a legit fold bundled in one element', () => {
+    const h = new Header()
+    h.parse(['legit: only\n more folded\n'])
+    assert.deepEqual(h.header_list, ['legit: only\n more folded\n'])
+    assert.equal(bareTerminator(h.toString()), false)
+  })
+
+  test('parse keeps ordinary headers, dot-prefixed names, and non-header junk', () => {
+    const h = new Header()
+    h.parse([
+      'From: a@b.com\n',
+      '.foo: bar\n',
+      'This is not a header line\n',
+      'To: c@d.com\n',
+    ])
+    assert.deepEqual(h.header_list, [
+      'From: a@b.com\n',
+      '.foo: bar\n',
+      'This is not a header line\n',
+      'To: c@d.com\n',
+    ])
+    assert.equal(h.invalid_headers, undefined)
+  })
+
+  for (const method of ['add', 'add_end']) {
+    test(`${method}() refuses unsafe header names in every framing`, () => {
+      for (const name of UNSAFE_NAMES) {
+        for (const key of [name, name.toUpperCase(), `${name} `, ` ${name}`]) {
+          const h = new Header()
+          h[method](key, 'x')
+          assert.equal(h.toString(), '', `key ${JSON.stringify(key)} leaked`)
+          assert.deepEqual(h.header_list, [])
+          assert.equal(h.get(name), '')
+        }
+      }
+    })
+
+    test(`${method}() cannot inject a terminator line via the value`, () => {
+      for (const value of ['a\n.\nb', 'a\r\n.\r\nb', 'ok\n..\nmore', 'x\n.']) {
+        const h = new Header()
+        h[method]('X-Foo', value)
+        assert.equal(bareTerminator(h.toString()), false)
+      }
+    })
+
+    test(`${method}() cannot inject a line via a newline in the key`, () => {
+      const h = new Header()
+      h[method]('X\n.\n', 'v')
+      assert.equal(bareTerminator(h.toString()), false)
+    })
+  }
+
+  test('add()/add_end() still accept ordinary, dot-prefixed, and folded values', () => {
+    const h = new Header()
+    h.add('X-Last', 'z')
+    h.add_end('.foo', 'bar')
+    h.add('X-First', 'a')
+    h.add_end('X-Folded', 'line1\n line2')
+    assert.deepEqual(h.header_list, [
+      'X-First: a\n',
+      'X-Last: z\n',
+      '.foo: bar\n',
+      'X-Folded: line1\n line2\n',
+    ])
+    assert.equal(h.get('x-first'), 'a')
+    assert.equal(h.get('.foo'), 'bar')
+  })
 })
