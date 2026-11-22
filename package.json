@@ -1,6 +1,6 @@
 {
   "name": "haraka-email-message",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Haraka email message",
   "main": "index.js",
   "files": [
@@ -39,12 +39,12 @@
     "@haraka/eslint-config": "^3.0.0"
   },
   "dependencies": {
-    "@haraka/email-address": "^3.1.6",
-    "haraka-config": "^1.7.0",
-    "haraka-message-stream": "^2.0.7",
+    "@haraka/email-address": "^3.1.7",
+    "haraka-config": "^1.8.0",
+    "haraka-message-stream": "^2.0.10",
     "iconv-lite": "^0.7.3",
-    "libmime": "^5.4.3",
-    "libqp": "^2.1.1"
+    "libmime": "^5.6.5",
+    "libqp": "^3.0.2"
   },
   "prettier": {
     "singleQuote": true,

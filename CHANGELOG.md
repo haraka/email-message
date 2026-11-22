@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.4.5] - 2026-11-21
+
 ### [1.4.4] - 2026-09-03
 
 - fix(security): reject unsafe header names
@@ -158,3 +160,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.4.2]: https://github.com/haraka/email-message/releases/tag/v1.4.2
 [1.4.3]: https://github.com/haraka/email-message/releases/tag/v1.4.3
 [1.4.4]: https://github.com/haraka/email-message/releases/tag/v1.4.4
+[1.4.5]: https://github.com/haraka/email-message/releases/tag/v1.4.5
