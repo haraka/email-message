@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### [1.4.5] - 2026-11-21
 
+- deps: bump versions
+
 ### [1.4.4] - 2026-09-03
 
 - fix(security): reject unsafe header names
